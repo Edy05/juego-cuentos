@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import AliasInput from './AliasInput'
 
-// Partículas (mariposas y destellos mágicos) fuera del componente para mantener pureza
+// Partículas generadas fuera del componente para mantener pureza (evita error de ESLint)
 const PARTICLES = Array.from({ length: 15 }, (_, i) => ({
   id: i,
   x: Math.random() * 100,
@@ -18,7 +18,7 @@ export default function WelcomeScreen({ onComplete }) {
   useEffect(() => {
     const timer = setTimeout(() => {
       setShowInput(true)
-    }, 2500) // Reducido un poco para que el niño no se aburra
+    }, 2500)
 
     return () => clearTimeout(timer)
   }, [])
@@ -30,14 +30,14 @@ export default function WelcomeScreen({ onComplete }) {
   return (
     <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
       
-      {/* Imagen de fondo del jardín mágico */}
+      {/* IMAGEN DE FONDO - inicio.jpeg */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/garden-bg.png')" }}
+        style={{ backgroundImage: "url('/inicio.jpeg')" }}
       />
       
-      {/* Capa oscura suave para que el texto sea legible */}
-      <div className="absolute inset-0 bg-black/20" />
+      {/* Capa oscura suave para que el texto sea legible sobre la imagen */}
+      <div className="absolute inset-0 bg-black/30" />
 
       {/* Partículas mágicas (destellos dorados flotando) */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -78,7 +78,7 @@ export default function WelcomeScreen({ onComplete }) {
         >
           {/* Título principal con sombra para resaltar sobre la imagen */}
           <motion.h1
-            className="text-5xl md:text-7xl font-bold text-white mb-2 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]"
+            className="text-5xl md:text-7xl font-bold text-white mb-2"
             initial={{ y: -50 }}
             animate={{ y: 0 }}
             transition={{ delay: 0.5, duration: 0.8, type: 'spring' }}
@@ -89,7 +89,7 @@ export default function WelcomeScreen({ onComplete }) {
             ¡Bienvenido a mi
           </motion.h1>
           <motion.h1
-            className="text-5xl md:text-7xl font-bold mb-8 drop-shadow-[0_4px_8px_rgba(0,0,0,0.5)]"
+            className="text-5xl md:text-7xl font-bold mb-8"
             initial={{ y: 50, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             transition={{ delay: 1.2, duration: 0.8, type: 'spring' }}
@@ -109,7 +109,7 @@ export default function WelcomeScreen({ onComplete }) {
           animate={{ rotate: 0, scale: 1 }}
           transition={{ delay: 2, duration: 1, type: 'spring' }}
         >
-          🌻✨🦋
+          ✨🦋
         </motion.div>
 
         {/* Campo de texto con animación */}

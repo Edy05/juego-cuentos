@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import Phase1DragDrop from './phases/Phase1DragDrop'
+import Phase1Detective from './phases/Phase1Detective'
 import Phase1BodyPuzzle from './phases/Phase1BodyPuzzle'
 import Phase1PathFinder from './phases/Phase1PathFinder'
 import Phase2Quiz from './phases/Phase2Quiz'
@@ -19,12 +19,12 @@ export default function GameLoop({ level, onComplete, onExit }) {
     }
   }
 
-  // ✅ CORREGIDO: Seleccionar el componente correcto según el nivel
+  // Seleccionar el componente correcto según el nivel
   const Phase1Component = 
-    level.id === 1 ? Phase1DragDrop :
+    level.id === 1 ? Phase1Detective :
     level.id === 2 ? Phase1BodyPuzzle :
     level.id === 3 ? Phase1PathFinder :
-    Phase1DragDrop // Fallback por defecto
+    Phase1Detective
 
   return (
     <div className="min-h-screen relative">

@@ -6,62 +6,92 @@ export default function Phase2Quiz({ level, onComplete }) {
   const [feedback, setFeedback] = useState(null)
   const [completed, setCompleted] = useState(false)
 
-  // Usar las opciones del nivel actual
-  const options = level.phase2Options || [
-    { id: 1, emoji: '', label: 'Ayudar a mis amigos a limpiar', isCorrect: true },
-    { id: 2, emoji: '🙅‍♀️🍕', label: 'Tirar basura al suelo', isCorrect: false, feedback: '¡Ups! Lina nunca ensuciaría el jardín. ¡Intenta de nuevo!' },
-    { id: 3, emoji: '💃🌪️', label: 'Bailar y no hacer caso', isCorrect: false, feedback: '¡Oh no! El jardín necesita nuestra ayuda, no es momento de bailar.' }
+  // Opciones con imágenes para el Nivel 1 (Lina)
+  const optionsLevel1 = [
+    {
+      id: 1,
+      label: 'Ayudar a limpiar',
+      img: '/lina-clean.jpeg',
+      isCorrect: true,
+      feedback: ''
+    },
+    {
+      id: 2,
+      label: 'Ir al espacio',
+      img: '/lina-space.jpeg',
+      isCorrect: false,
+      feedback: '¡Ups! Lina es detective del jardín, no astronauta. '
+    },
+    {
+      id: 3,
+      label: 'Bailar',
+      img: '/lina-dance.jpeg',
+      isCorrect: false,
+      feedback: '¡Oh no! Lina es responsable. ¡Primero hay que limpiar! 🧹'
+    },
+    {
+      id: 4,
+      label: 'Nadar',
+      img: '/lina-swim.jpeg',
+      isCorrect: false,
+      feedback: '¡Ups! Lina tiene una misión en el jardín. '
+    }
   ]
 
-  // Moraleja dinámica según el nivel
-  const moral = level.id === 1 
-    ? '"Si amas el orden y la limpieza, tu vida florece con más belleza" 🌸'
-    : '"Cada cambio bien vivido, despierta un nuevo latido" 🦋'
+  // Opciones por defecto para otros niveles
+  const optionsDefault = [
+    { id: 1, emoji: '', label: 'Ayudar a limpiar', isCorrect: true },
+    { id: 2, emoji: '🙅‍♀️', label: 'Tirar basura', isCorrect: false, feedback: '¡Ups! Lina nunca ensuciaría. ' },
+    { id: 3, emoji: '💃', label: 'Bailar', isCorrect: false, feedback: '¡Primero hay que limpiar! ' }
+  ]
+
+  const options = level.id === 1 ? optionsLevel1 : optionsDefault
 
   const handleSelect = (option) => {
     setSelectedId(option.id)
 
     if (option.isCorrect) {
       const successMessage = level.id === 1 
-        ? '¡Excelente! Lina estaría muy orgullosa de ti.' 
-        : '¡Excelente! Estarías muy orgulloso.'
+        ? '¡Excelente! Lina siempre ayuda. ' 
+        : '¡Excelente!'
         
       setFeedback({ type: 'success', message: successMessage })
       setCompleted(true)
       setTimeout(() => onComplete(1), 2500) 
     } else {
       setFeedback({ type: 'error', message: option.feedback || '¡Ups! Intenta de nuevo.' })
-      setTimeout(() => setSelectedId(null), 1500)
+      setTimeout(() => setSelectedId(null), 2000)
     }
 
-    setTimeout(() => setFeedback(null), 2000)
+    setTimeout(() => setFeedback(null), 3000)
   }
 
   return (
     <div className="min-h-screen relative overflow-hidden p-4 flex flex-col items-center">
       
-      {/* FONDO DINÁMICO SEGÚN EL NIVEL */}
+      {/* Fondo dinámico según el nivel */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: level.id === 1 
-            ? "url('/phase1-bg.jpg')"   // Nivel 1: Lina
-            : "url('/phase2-bg.jpg')"   // Nivel 2: Thomas
+            ? "url('/detective-bg.jpeg')"
+            : level.id === 2
+              ? "url('/phase2-bg.jpg')"
+              : "url('/phase1-bg.jpg')"
         }}
       />
       
-      {/* Capa oscura suave para que el contenido sea legible */}
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 bg-black/40" />
 
       {/* Header */}
       <motion.div 
         initial={{ y: -30, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="relative z-10 text-center mb-6 mt-4"
+        className="relative z-10 text-center mb-4 mt-4"
       >
-        <div className="text-5xl mb-2 drop-shadow-lg">🤔</div>
-        <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg mb-2">
-          {level.phase2Question || '¿Qué harías tú?'}
+        <div className="text-4xl mb-1 drop-shadow-lg">🤔</div>
+        <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg">
+          {level.phase2Question || '¿Qué haría Lina?'}
         </h2>
       </motion.div>
 
@@ -74,10 +104,10 @@ export default function Phase2Quiz({ level, onComplete }) {
             exit={{ scale: 0, opacity: 0 }}
             className={`
               fixed top-24 left-1/2 -translate-x-1/2 z-50 
-              px-6 py-4 rounded-3xl text-lg md:text-xl font-bold shadow-2xl text-center max-w-xs
+              px-6 py-4 rounded-3xl text-lg font-bold shadow-2xl text-center
               ${feedback.type === 'success' 
-                ? 'bg-green-500 text-white border-4 border-green-300' 
-                : 'bg-red-500 text-white border-4 border-red-300'}
+                ? 'bg-green-500 text-white' 
+                : 'bg-orange-500 text-white'}
             `}
           >
             {feedback.message}
@@ -97,22 +127,18 @@ export default function Phase2Quiz({ level, onComplete }) {
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: 'spring', bounce: 0.6 }}
-              className="bg-linear-to-br from-yellow-400 to-orange-500 rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full"
+              className="bg-gradient-to-br from-yellow-400 to-orange-500 rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full"
             >
               <div className="text-7xl mb-3">⭐⭐</div>
-              <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                ¡Muy bien!
-              </h3>
-              <p className="text-white text-lg mb-4">
-                Has ganado tu segunda estrella
-              </p>
+              <h3 className="text-2xl font-bold text-white mb-3">¡Muy bien!</h3>
+              <p className="text-white text-lg">Has ganado tu segunda estrella</p>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Tarjetas de Opciones */}
-      <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl flex-grow items-center">
+      {/* Tarjetas de Opciones - PEQUEÑAS */}
+      <div className="relative z-10 grid grid-cols-2 gap-3 w-full max-w-lg flex-grow items-center px-2">
         {options.map((option, index) => {
           const isSelected = selectedId === option.id
           const isWrong = isSelected && !option.isCorrect
@@ -121,37 +147,70 @@ export default function Phase2Quiz({ level, onComplete }) {
             <motion.button
               key={option.id}
               onClick={() => handleSelect(option)}
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.5 + index * 0.2 }}
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ 
+                opacity: 1, 
+                scale: isSelected ? 1.05 : 1
+              }}
+              transition={{ delay: 0.2 + index * 0.1 }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={`
-                relative bg-white/95 backdrop-blur-sm rounded-3xl p-6 shadow-xl border-4 
-                flex flex-col items-center justify-center min-h-[200px]
+                relative rounded-xl overflow-hidden shadow-xl
                 transition-all duration-300
                 ${isWrong 
-                  ? 'border-red-500 bg-red-50' 
-                  : isSelected 
-                    ? 'border-green-500 bg-green-50' 
-                    : 'border-purple-200 hover:border-purple-400'}
+                  ? 'ring-4 ring-red-500' 
+                  : isSelected && option.isCorrect
+                    ? 'ring-4 ring-green-500'
+                    : 'ring-2 ring-white/30 hover:ring-white/60'}
               `}
+              style={{
+                aspectRatio: '1/1',
+                maxHeight: '150px'
+              }}
             >
-              <div className={`text-7xl mb-4 ${isWrong ? 'animate-pulse' : ''}`}>
-                {option.emoji}
-              </div>
-              
-              <p className="text-lg md:text-xl font-bold text-gray-700 text-center leading-tight">
-                {option.label}
-              </p>
+              {option.img ? (
+                <img 
+                  src={option.img} 
+                  alt={option.label}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className={`w-full h-full bg-white/90 flex flex-col items-center justify-center p-3`}>
+                  <div className="text-4xl mb-2">{option.emoji}</div>
+                  <p className="text-xs font-bold text-gray-700 text-center">
+                    {option.label}
+                  </p>
+                </div>
+              )}
 
+              {/* Label pequeño */}
+              {option.img && (
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                  <p className="text-white font-bold text-xs text-center">
+                    {option.label}
+                  </p>
+                </div>
+              )}
+
+              {/* Indicador */}
               {isWrong && (
                 <motion.div 
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-3 -right-3 bg-red-500 text-white rounded-full w-10 h-10 flex items-center justify-center text-2xl font-bold shadow-lg"
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-lg font-bold"
                 >
                   ✕
+                </motion.div>
+              )}
+
+              {isSelected && option.isCorrect && (
+                <motion.div 
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="absolute top-1 right-1 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-lg font-bold"
+                >
+                  ✓
                 </motion.div>
               )}
             </motion.button>
@@ -159,15 +218,17 @@ export default function Phase2Quiz({ level, onComplete }) {
         })}
       </div>
 
-      {/* Moraleja dinámica según el nivel */}
+      {/* Moraleja */}
       <motion.div 
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ delay: 1.5 }}
+        transition={{ delay: 1 }}
         className="relative z-10 mt-4 text-center"
       >
-        <p className="text-white font-semibold italic text-sm md:text-base drop-shadow-lg bg-black/30 px-4 py-2 rounded-full inline-block">
-          {moral}
+        <p className="text-white font-semibold italic text-xs md:text-sm drop-shadow-lg bg-black/30 px-3 py-1 rounded-full inline-block">
+          {level.id === 1
+            ? '"Si amas el orden y la limpieza..." 🌸'
+            : '"Cada cambio bien vivido..." 🦋'}
         </p>
       </motion.div>
     </div>
