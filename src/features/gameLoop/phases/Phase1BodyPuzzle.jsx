@@ -1,294 +1,165 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-// Definición de las partes y las opciones
+// Definición de los animales y sus partes
+const ANIMALS = ['thomas', 'ardilla', 'lechuza', 'hormiga']
+
 const BODY_PARTS = [
-  {
-    id: 'head',
-    name: 'Cabeza',
-    correctId: 'thomas',
-    options: [
-      { id: 'thomas', label: 'Thomas', isCorrect: true, img: '/thomas-head.png', emoji: '🐛' },
-      { id: 'lina', label: 'Lina', isCorrect: false, feedback: '¡Esa es Lina la mariquita! ', img: '/lina-head.png', emoji: '' },
-      { id: 'butterfly', label: 'Mariposa', isCorrect: false, feedback: '¡Esa es una mariposa! 🦋', img: '/butterfly-head.png', emoji: '🦋' }
-    ]
-  },
-  {
-    id: 'torso',
-    name: 'Cuerpo',
-    correctId: 'thomas',
-    options: [
-      { id: 'thomas', label: 'Verde', isCorrect: true, img: '/thomas-body.png', emoji: '' },
-      { id: 'lina', label: 'Rojo', isCorrect: false, feedback: '¡Ese es el caparazón de Lina! 🐞', emoji: '' },
-      { id: 'butterfly', label: 'Azul', isCorrect: false, feedback: '¡Eso es de una mariposa! 🦋', emoji: '🔵' }
-    ]
-  },
-  {
-    id: 'arms',
-    name: 'Patitas',
-    correctId: 'thomas',
-    options: [
-      { id: 'thomas', label: 'Cortas', isCorrect: true, emoji: '' },
-      { id: 'lina', label: '6 patas', isCorrect: false, feedback: '¡Esas son patas de hormiga! 🐜', emoji: '🐜' },
-      { id: 'butterfly', label: 'Alas', isCorrect: false, feedback: '¡Esas son alas! 🦋', emoji: '' }
-    ]
-  },
-  {
-    id: 'legs',
-    name: 'Cola',
-    correctId: 'thomas',
-    options: [
-      { id: 'thomas', label: 'Verde', isCorrect: true, emoji: '' },
-      { id: 'lina', label: 'Negra', isCorrect: false, feedback: '¡Esa es la cola de Lina! ⚫', emoji: '⚫' },
-      { id: 'butterfly', label: 'Brillos', isCorrect: false, feedback: '¡Eso es polvo mágico! ✨', emoji: '✨' }
-    ]
-  }
+  { id: 'head', label: 'Cabeza', y: 0 },
+  { id: 'body', label: 'Cuerpo', y: 120 },
+  { id: 'legs', label: 'Patas', y: 240 }
 ]
 
+// Estado inicial: cada parte muestra un animal aleatorio (pero no Thomas completo al inicio)
+const getRandomAnimal = (exclude = null) => {
+  const filtered = ANIMALS.filter(a => a !== exclude)
+  return filtered[Math.floor(Math.random() * filtered.length)]
+}
+
 export default function Phase1BodyPuzzle({ onComplete }) {
-  const [completedParts, setCompletedParts] = useState({})
-  const [selectedPart, setSelectedPart] = useState(null)
-  const [feedback, setFeedback] = useState(null)
-  const [isAnimating, setIsAnimating] = useState(false)
+  const [parts, setParts] = useState({
+    head: getRandomAnimal('thomas'),
+    body: getRandomAnimal('thomas'),
+    legs: getRandomAnimal('thomas')
+  })
+  const [completed, setCompleted] = useState(false)
 
-  const isFinished = Object.keys(completedParts).length === BODY_PARTS.length
+  const handlePartClick = (partId) => {
+    if (completed) return
 
-  const handleOptionClick = (option, part) => {
-    if (isAnimating) return // Prevenir múltiples clics
-    
-    setIsAnimating(true)
-    
-    if (option.isCorrect) {
-      setFeedback({ type: 'success', message: `¡Perfecto! Esa es la ${part.name}. ✨` })
-      setCompletedParts({ ...completedParts, [part.id]: option })
-      setSelectedPart(null)
-      
-      setTimeout(() => {
-        setFeedback(null)
-        setIsAnimating(false)
-        if (Object.keys(completedParts).length === BODY_PARTS.length - 1) {
-          setTimeout(() => onComplete(1), 500)
-        }
-      }, 1000)
-    } else {
-      setFeedback({ type: 'error', message: option.feedback })
-      setIsAnimating(false)
-      setTimeout(() => setFeedback(null), 2000)
+    // Ciclo entre los 4 animales
+    const currentIndex = ANIMALS.indexOf(parts[partId])
+    const nextIndex = (currentIndex + 1) % ANIMALS.length
+    const nextAnimal = ANIMALS[nextIndex]
+
+    setParts(prev => ({ ...prev, [partId]: nextAnimal }))
+
+    // Verificar si completó
+    const newParts = { ...parts, [partId]: nextAnimal }
+    if (newParts.head === 'thomas' && newParts.body === 'thomas' && newParts.legs === 'thomas') {
+      setCompleted(true)
+      setTimeout(() => onComplete(1), 3000)
     }
-  }
-
-  const handleCloseModal = () => {
-    if (!isAnimating) {
-      setSelectedPart(null)
-    }
-  }
-
-  if (isFinished) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-green-400 to-emerald-600 p-4">
-        <motion.div 
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          className="bg-white rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full"
-        >
-          <div className="text-7xl mb-4">🎉</div>
-          <h2 className="text-3xl font-bold text-green-700 mb-2">¡Thomas está completo!</h2>
-          <p className="text-gray-600 text-lg mb-6">Has ganado tu primera estrella</p>
-          <div className="text-6xl animate-bounce">⭐</div>
-        </motion.div>
-      </div>
-    )
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-linear-to-br from-green-100 via-emerald-100 to-teal-100 p-4 flex flex-col items-center" style={{ touchAction: 'pan-y' }}>
-      
+   <div className="min-h-screen relative overflow-hidden p-4 flex flex-col items-center" style={{ backgroundImage: "url('/phase2-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
       {/* Header */}
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         className="text-center mb-6"
       >
-        <h2 className="text-2xl md:text-3xl font-bold text-green-800">
-          🧩 ¡Arma a Thomas!
+        <h2 className="text-2xl md:text-3xl font-bold text-green-800 mb-2">
+           ¡Arma a Thomas!
         </h2>
-        <p className="text-sm md:text-base text-green-700 mt-2">
-          Toca un espacio vacío para completarlo
+        <p className="text-sm md:text-base text-green-700">
+          Toca cada parte para encontrar las piezas correctas
         </p>
       </motion.div>
 
-      {/* Feedback Flotante */}
-      <AnimatePresence>
-        {feedback && (
-          <motion.div
-            initial={{ scale: 0, opacity: 0, y: -50 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0, opacity: 0, y: -50 }}
-            className={`
-              fixed top-24 left-1/2 -translate-x-1/2 z-50 
-              px-6 py-4 rounded-3xl text-lg font-bold shadow-2xl text-center max-w-xs
-              ${feedback.type === 'success' 
-                ? 'bg-green-500 text-white' 
-                : 'bg-orange-500 text-white'}
-            `}
-            style={{ pointerEvents: 'none' }}
-          >
-            {feedback.message}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Contador de progreso */}
+      <div className="mb-4 bg-white/80 rounded-full px-6 py-2 shadow-md">
+        <p className="text-green-800 font-bold">
+          Partes correctas: {Object.values(parts).filter(p => p === 'thomas').length} / 3
+        </p>
+      </div>
 
-      {/* CUERPO DE THOMAS - Espacios para completar */}
-      <div className="flex-grow flex items-center justify-center w-full max-w-md">
-        <div className="bg-white/90 rounded-3xl p-6 shadow-2xl border-4 border-green-400 w-full">
-          <div className="text-center mb-4">
-            <p className="text-lg font-bold text-green-700">Thomas</p>
-            <div className="text-sm text-green-600">
-              {Object.keys(completedParts).length} / {BODY_PARTS.length} completados
-            </div>
-          </div>
+      {/* Animal combinado */}
+      <div className="relative flex-grow flex items-center justify-center">
+        <div className="relative w-64 h-96">
+          {BODY_PARTS.map((part) => {
+            const currentAnimal = parts[part.id]
+            const isCorrectPart = currentAnimal === 'thomas'
 
-          <div className="flex flex-col items-center gap-3">
-            {BODY_PARTS.map((part) => {
-              const isCompleted = completedParts[part.id]
-              
-              return (
-                <motion.button
-                  key={part.id}
-                  onClick={() => !isCompleted && !isAnimating && setSelectedPart(part)}
-                  disabled={isCompleted || isAnimating}
-                  whileHover={!isCompleted && !isAnimating ? { scale: 1.05 } : {}}
-                  whileTap={!isCompleted && !isAnimating ? { scale: 0.95 } : {}}
-                  className={`
-                    w-full h-24 rounded-2xl border-4 flex items-center justify-center text-4xl
-                    transition-all duration-300 touch-manipulation
-                    ${isCompleted 
-                      ? 'bg-green-500 border-green-600 cursor-default opacity-80' 
-                      : 'bg-yellow-50 border-yellow-400 border-dashed cursor-pointer animate-pulse'}
-                  `}
-                  style={{ 
-                    WebkitTapHighlightColor: 'transparent',
-                    touchAction: 'manipulation'
+            return (
+              <motion.button
+                key={part.id}
+                onClick={() => handlePartClick(part.id)}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                className={`absolute left-1/2 -translate-x-1/2 w-48 h-32 rounded-2xl overflow-hidden shadow-lg border-4 transition-all duration-300 ${
+                  isCorrectPart 
+                    ? 'border-green-500 ring-4 ring-green-300' 
+                    : 'border-gray-300 hover:border-purple-400'
+                }`}
+                style={{ top: `${part.y}px` }}
+              >
+                <img 
+                  src={`/${currentAnimal}-${part.id}.jpeg`}
+                  alt={`${currentAnimal} ${part.label}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.target.style.display = 'none'
+                    e.target.nextSibling.style.display = 'flex'
                   }}
-                >
-                  {isCompleted ? (
-                    completedParts[part.id].img ? (
-                      <img 
-                        src={completedParts[part.id].img} 
-                        alt={part.name}
-                        className="w-16 h-16 object-contain"
-                        onError={(e) => { e.target.style.display = 'none' }}
-                      />
-                    ) : (
-                      <span>{completedParts[part.id].emoji || '✅'}</span>
-                    )
-                  ) : (
-                    <div className="flex flex-col items-center">
-                      <span className="text-3xl mb-1">❓</span>
-                      <span className="text-sm font-bold text-yellow-700">{part.name}</span>
-                    </div>
-                  )}
-                </motion.button>
-              )
-            })}
-          </div>
+                />
+                <div className="hidden w-full h-full bg-gray-200 items-center justify-center text-4xl">
+                  {currentAnimal === 'thomas' ? '🐛' : currentAnimal === 'ardilla' ? '🐿️' : currentAnimal === 'lechuza' ? '' : '🐜'}
+                </div>
+
+                {/* Indicador de parte correcta */}
+                {isCorrectPart && (
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="absolute top-2 right-2 bg-green-500 text-white rounded-full w-8 h-8 flex items-center justify-center text-xl font-bold shadow-lg"
+                  >
+                    ✓
+                  </motion.div>
+                )}
+
+                {/* Etiqueta de la parte */}
+                <div className="absolute bottom-0 left-0 right-0 bg-black/60 text-white text-xs font-bold py-1 text-center">
+                  {part.label}
+                </div>
+              </motion.button>
+            )
+          })}
         </div>
       </div>
 
-      {/* MODAL DE SELECCIÓN - Optimizado para móviles */}
+      {/* Modal de Victoria - Thomas Completo */}
       <AnimatePresence>
-        {selectedPart && (
+        {completed && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={handleCloseModal}
-            className="fixed inset-0 bg-black/70 z-40 flex items-end md:items-center justify-center p-0 md:p-4"
-            style={{ 
-              touchAction: 'none',
-              pointerEvents: 'auto'
-            }}
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
           >
-            <motion.div
-              initial={{ y: '100%' }}
-              animate={{ y: 0 }}
-              exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              onClick={(e) => e.stopPropagation()}
-              className="bg-white rounded-t-3xl md:rounded-3xl p-4 md:p-6 w-full max-w-2xl shadow-2xl max-h-[85vh] overflow-y-auto"
-              style={{ 
-                touchAction: 'pan-y',
-                WebkitOverflowScrolling: 'touch'
-              }}
+            <motion.div 
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', bounce: 0.6 }}
+              className="bg-white rounded-3xl p-8 text-center shadow-2xl max-w-md w-full"
             >
-              <div className="text-center mb-4 md:mb-6">
-                <h3 className="text-xl md:text-3xl font-bold text-green-800 mb-2">
-                  Elige la {selectedPart.name}
-                </h3>
-                <p className="text-gray-600 text-sm md:text-base">¿Cuál es la {selectedPart.name} de Thomas?</p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4">
-                {selectedPart.options.map((option, index) => (
-                  <motion.button
-                    key={option.id}
-                    onClick={() => handleOptionClick(option, selectedPart)}
-                    onTouchEnd={(e) => {
-                      e.preventDefault()
-                      handleOptionClick(option, selectedPart)
-                    }}
-                    initial={{ opacity: 0, scale: 0.8, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    className="bg-linear-to-br from-purple-100 to-pink-100 rounded-2xl p-4 md:p-6 border-4 border-purple-300 hover:border-purple-500 active:border-purple-600 transition-all min-h-[180px] md:min-h-[250px] flex flex-col items-center justify-center cursor-pointer"
-                    style={{ 
-                      touchAction: 'manipulation',
-                      WebkitTapHighlightColor: 'transparent',
-                      pointerEvents: 'auto'
-                    }}
-                  >
-                    {option.img ? (
-                      <img 
-                        src={option.img} 
-                        alt={option.label}
-                        className="w-24 h-24 md:w-40 md:h-40 object-contain mb-3 md:mb-4"
-                        onError={(e) => { e.target.style.display = 'none' }}
-                        draggable={false}
-                      />
-                    ) : null}
-                    <span 
-                      className="text-5xl md:text-7xl mb-3 md:mb-4" 
-                      style={{ display: option.img ? 'none' : 'block' }}
-                    >
-                      {option.emoji}
-                    </span>
-                    <span className="text-base md:text-xl font-bold text-purple-800 text-center">
-                      {option.label}
-                    </span>
-                  </motion.button>
-                ))}
-              </div>
-
-              <button
-                onClick={handleCloseModal}
-                onTouchEnd={(e) => {
-                  e.preventDefault()
-                  handleCloseModal()
-                }}
-                className="mt-4 md:mt-6 w-full py-3 bg-gray-200 hover:bg-gray-300 active:bg-gray-400 rounded-xl text-gray-700 font-bold text-lg transition-colors"
-                style={{ 
-                  touchAction: 'manipulation',
-                  WebkitTapHighlightColor: 'transparent'
-                }}
-              >
-                Cancelar
-              </button>
+              <img 
+                src="/thomas.jpeg"
+                alt="Thomas completo"
+                className="w-48 h-48 object-contain mx-auto mb-4 rounded-full border-4 border-green-400"
+              />
+              <h3 className="text-3xl font-bold text-green-700 mb-2">
+                ¡Thomas está completo!
+              </h3>
+              <p className="text-gray-600 text-lg mb-4">
+                Has encontrado todas las partes correctas
+              </p>
+              <div className="text-6xl animate-bounce">⭐</div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Instrucciones */}
+      <div className="mt-4 text-center">
+        <div className="bg-white/90 rounded-full px-6 py-3 shadow-lg inline-block">
+          <p className="text-green-800 font-bold text-sm md:text-base">
+             Toca cada parte para cambiar el animal
+          </p>
+        </div>
+      </div>
     </div>
   )
 }

@@ -4,6 +4,7 @@ import Phase1Detective from './phases/Phase1Detective'
 import Phase1BodyPuzzle from './phases/Phase1BodyPuzzle'
 import Phase1PathFinder from './phases/Phase1PathFinder'
 import Phase2Quiz from './phases/Phase2Quiz'
+import Phase2Thomas from './phases/Phase2Thomas'
 
 export default function GameLoop({ level, onComplete, onExit }) {
   const [currentPhase, setCurrentPhase] = useState(1)
@@ -19,12 +20,16 @@ export default function GameLoop({ level, onComplete, onExit }) {
     }
   }
 
-  // Seleccionar el componente correcto según el nivel
+  // Seleccionar componentes según el nivel
   const Phase1Component = 
     level.id === 1 ? Phase1Detective :
     level.id === 2 ? Phase1BodyPuzzle :
     level.id === 3 ? Phase1PathFinder :
     Phase1Detective
+
+  const Phase2Component = 
+    level.id === 2 ? Phase2Thomas :
+    Phase2Quiz
 
   return (
     <div className="min-h-screen relative">
@@ -78,7 +83,7 @@ export default function GameLoop({ level, onComplete, onExit }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
             >
-              <Phase2Quiz 
+              <Phase2Component 
                 level={level}
                 onComplete={handlePhaseComplete} 
               />
@@ -93,7 +98,7 @@ export default function GameLoop({ level, onComplete, onExit }) {
               className="min-h-screen flex items-center justify-center bg-gray-900 text-white"
             >
               <div className="text-center p-8">
-                <h2 className="text-4xl font-bold mb-4">🔍 Fase 3: Próximamente</h2>
+                <h2 className="text-4xl font-bold mb-4"> Fase 3: Próximamente</h2>
                 <p className="text-xl">Aquí irá el objeto escondido</p>
                 <button
                   onClick={() => onComplete(starsEarned)}
