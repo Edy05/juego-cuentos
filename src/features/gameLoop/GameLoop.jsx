@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Phase1Detective from './phases/Phase1Detective'
 import Phase1BodyPuzzle from './phases/Phase1BodyPuzzle'
 import Phase1PathFinder from './phases/Phase1PathFinder'
+import MemoryGame from './phases/MemoryGame'
 import Phase2Quiz from './phases/Phase2Quiz'
 import Phase2Thomas from './phases/Phase2Thomas'
 
@@ -14,22 +15,11 @@ export default function GameLoop({ level, onComplete, onExit }) {
     setStarsEarned(prev => prev + stars)
     
     if (currentPhase === 1) {
-      setTimeout(() => setCurrentPhase(2), 2500)
+      setTimeout(() => setCurrentPhase(2), 4500)
     } else if (currentPhase === 2) {
-      setTimeout(() => onComplete(starsEarned + stars), 2500)
+      setTimeout(() => onComplete(starsEarned + stars), 4500)
     }
   }
-
-  // Seleccionar componentes según el nivel
-  const Phase1Component = 
-    level.id === 1 ? Phase1Detective :
-    level.id === 2 ? Phase1BodyPuzzle :
-    level.id === 3 ? Phase1PathFinder :
-    Phase1Detective
-
-  const Phase2Component = 
-    level.id === 2 ? Phase2Thomas :
-    Phase2Quiz
 
   return (
     <div className="min-h-screen relative">
@@ -65,6 +55,8 @@ export default function GameLoop({ level, onComplete, onExit }) {
       {/* Contenido de la fase actual */}
       <div className="pt-16 md:pt-20">
         <AnimatePresence mode="wait">
+          
+          {/* FASE 1 */}
           {currentPhase === 1 && (
             <motion.div
               key="phase1"
@@ -72,10 +64,19 @@ export default function GameLoop({ level, onComplete, onExit }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
             >
-              <Phase1Component onComplete={handlePhaseComplete} />
+              {level.id === 1 && <Phase1Detective onComplete={handlePhaseComplete} />}
+              {level.id === 2 && <Phase1BodyPuzzle onComplete={handlePhaseComplete} />}
+              {level.id === 3 && <Phase1PathFinder onComplete={handlePhaseComplete} />}
+              {level.id === 4 && (
+                <MemoryGame 
+                  pairs={['memory1', 'memory2', 'memory3']} 
+                  onComplete={handlePhaseComplete} 
+                />
+              )}
             </motion.div>
           )}
 
+          {/* FASE 2 */}
           {currentPhase === 2 && (
             <motion.div
               key="phase2"
@@ -83,13 +84,19 @@ export default function GameLoop({ level, onComplete, onExit }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -50 }}
             >
-              <Phase2Component 
-                level={level}
-                onComplete={handlePhaseComplete} 
-              />
+              {level.id === 1 && <Phase2Quiz level={level} onComplete={handlePhaseComplete} />}
+              {level.id === 2 && <Phase2Thomas onComplete={handlePhaseComplete} />}
+              {level.id === 3 && <Phase2Quiz level={level} onComplete={handlePhaseComplete} />}
+              {level.id === 4 && (
+                <MemoryGame 
+                  pairs={['memory4', 'memory5', 'memory6', 'memory7']} 
+                  onComplete={handlePhaseComplete} 
+                />
+              )}
             </motion.div>
           )}
 
+          {/* FASE 3 (Próximamente) */}
           {currentPhase === 3 && (
             <motion.div
               key="phase3"
@@ -98,7 +105,7 @@ export default function GameLoop({ level, onComplete, onExit }) {
               className="min-h-screen flex items-center justify-center bg-gray-900 text-white"
             >
               <div className="text-center p-8">
-                <h2 className="text-4xl font-bold mb-4"> Fase 3: Próximamente</h2>
+                <h2 className="text-4xl font-bold mb-4">🔍 Fase 3: Próximamente</h2>
                 <p className="text-xl">Aquí irá el objeto escondido</p>
                 <button
                   onClick={() => onComplete(starsEarned)}
@@ -109,6 +116,7 @@ export default function GameLoop({ level, onComplete, onExit }) {
               </div>
             </motion.div>
           )}
+
         </AnimatePresence>
       </div>
     </div>

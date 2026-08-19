@@ -107,8 +107,42 @@ export const levels = [
   phase2CorrectAnswer: 0,
   phase3HiddenObject: '🌸',
   phase3Hint: 'Busca la flor escondida en el jardín'
+},
+
+// Nivel 4: Rojita la ardilla
+{
+  id: 4,
+  characterId: 4,
+  characterName: "Rojita la Ardilla",
+  storyTitle: "La ardilla que coleccionaba momentos",
+  emoji: "️",
+  color: "from-amber-400 to-orange-600",
+  phase2Question: "¿Qué harías tú si fueras Rojita?",
+  phase2Options: [
+    {
+      id: 1,
+      emoji: '✨',
+      label: 'Guardar momentos felices',
+      isCorrect: true
+    },
+    {
+      id: 2,
+      emoji: '😤',
+      label: 'Enojarme y no ayudar',
+      isCorrect: false,
+      feedback: '¡Oh no! Rojita siempre quiso compartir alegría con sus amigos.'
+    },
+    {
+      id: 3,
+      emoji: '‍♀️',
+      label: 'Huir y esconderme',
+      isCorrect: false,
+      feedback: '¡Ups! Rojita se quedó para ayudar, no huyó.'
+    }
+  ],
+  phase2CorrectAnswer: 0,
+  phase3HiddenObject: '',
+  phase3Hint: 'Busca la flor escondida en el jardín'
 }
-
-
 
 ]

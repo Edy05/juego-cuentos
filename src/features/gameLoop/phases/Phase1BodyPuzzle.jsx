@@ -6,8 +6,8 @@ const ANIMALS = ['thomas', 'ardilla', 'lechuza', 'hormiga']
 
 const BODY_PARTS = [
   { id: 'head', label: 'Cabeza', y: 0 },
-  { id: 'body', label: 'Cuerpo', y: 120 },
-  { id: 'legs', label: 'Patas', y: 240 }
+  { id: 'body', label: 'Cuerpo', y: 130 },
+  { id: 'legs', label: 'Patas', y: 260 }
 ]
 
 // Estado inicial: cada parte muestra un animal aleatorio (pero no Thomas completo al inicio)
@@ -37,37 +37,48 @@ export default function Phase1BodyPuzzle({ onComplete }) {
     // Verificar si completó
     const newParts = { ...parts, [partId]: nextAnimal }
     if (newParts.head === 'thomas' && newParts.body === 'thomas' && newParts.legs === 'thomas') {
+      // ⏱️ TIEMPO ORIGINAL RESTAURADO
       setCompleted(true)
       setTimeout(() => onComplete(1), 3000)
     }
   }
 
   return (
-   <div className="min-h-screen relative overflow-hidden p-4 flex flex-col items-center" style={{ backgroundImage: "url('/phase2-bg.jpg')", backgroundSize: 'cover', backgroundPosition: 'center' }}>
+    <div className="min-h-screen relative overflow-hidden p-4 flex flex-col items-center">
+      
+      {/* FONDO: phase2-bg.jpg */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: "url('/phase2-bg.jpg')" }}
+      />
+      
+      {/* Capa oscura muy suave para que las partes del cuerpo resalten sobre la imagen */}
+      <div className="absolute inset-0 bg-black/20" />
+
       {/* Header */}
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="text-center mb-6"
+        className="relative z-10 text-center mb-6"
       >
-        <h2 className="text-2xl md:text-3xl font-bold text-green-800 mb-2">
+        <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg mb-2">
            ¡Arma a Thomas!
         </h2>
-        <p className="text-sm md:text-base text-green-700">
+        <p className="text-sm md:text-base text-white/90 drop-shadow">
           Toca cada parte para encontrar las piezas correctas
         </p>
       </motion.div>
 
       {/* Contador de progreso */}
-      <div className="mb-4 bg-white/80 rounded-full px-6 py-2 shadow-md">
+      <div className="relative z-10 mb-4 bg-white/90 rounded-full px-6 py-2 shadow-md">
         <p className="text-green-800 font-bold">
           Partes correctas: {Object.values(parts).filter(p => p === 'thomas').length} / 3
         </p>
       </div>
 
       {/* Animal combinado */}
-      <div className="relative flex-grow flex items-center justify-center">
-        <div className="relative w-64 h-96">
+      <div className="relative z-10 flex-grow flex items-center justify-center">
+        <div className="relative w-48 h-[420px]">
           {BODY_PARTS.map((part) => {
             const currentAnimal = parts[part.id]
             const isCorrectPart = currentAnimal === 'thomas'
@@ -80,12 +91,16 @@ export default function Phase1BodyPuzzle({ onComplete }) {
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className={`absolute left-1/2 -translate-x-1/2 w-48 h-32 rounded-2xl overflow-hidden shadow-lg border-4 transition-all duration-300 ${
+                className={`absolute left-1/2 -translate-x-1/2 rounded-2xl overflow-hidden shadow-lg border-4 transition-all duration-300 ${
                   isCorrectPart 
                     ? 'border-green-500 ring-4 ring-green-300' 
                     : 'border-gray-300 hover:border-purple-400'
                 }`}
-                style={{ top: `${part.y}px` }}
+                style={{ 
+                  top: `${part.y}px`,
+                  width: '160px',
+                  height: '120px'
+                }}
               >
                 <img 
                   src={`/${currentAnimal}-${part.id}.jpeg`}
@@ -121,7 +136,7 @@ export default function Phase1BodyPuzzle({ onComplete }) {
         </div>
       </div>
 
-      {/* Modal de Victoria - Thomas Completo */}
+      {/* Modal de Victoria con fondo VERDE */}
       <AnimatePresence>
         {completed && (
           <motion.div
@@ -133,17 +148,17 @@ export default function Phase1BodyPuzzle({ onComplete }) {
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: 'spring', bounce: 0.6 }}
-              className="bg-white rounded-3xl p-8 text-center shadow-2xl max-w-md w-full"
+              className="bg-gradient-to-br from-green-400 via-emerald-500 to-teal-500 rounded-3xl p-8 text-center shadow-2xl max-w-md w-full border-4 border-white/50"
             >
               <img 
                 src="/thomas.jpeg"
                 alt="Thomas completo"
-                className="w-48 h-48 object-contain mx-auto mb-4 rounded-full border-4 border-green-400"
+                className="w-48 h-48 object-contain mx-auto mb-4 rounded-full border-4 border-white/70 bg-white/20 backdrop-blur-sm"
               />
-              <h3 className="text-3xl font-bold text-green-700 mb-2">
+              <h3 className="text-3xl font-bold text-white mb-2 drop-shadow-lg">
                 ¡Thomas está completo!
               </h3>
-              <p className="text-gray-600 text-lg mb-4">
+              <p className="text-white/95 text-lg mb-4 drop-shadow">
                 Has encontrado todas las partes correctas
               </p>
               <div className="text-6xl animate-bounce">⭐</div>
@@ -153,7 +168,7 @@ export default function Phase1BodyPuzzle({ onComplete }) {
       </AnimatePresence>
 
       {/* Instrucciones */}
-      <div className="mt-4 text-center">
+      <div className="relative z-10 mt-4 text-center">
         <div className="bg-white/90 rounded-full px-6 py-3 shadow-lg inline-block">
           <p className="text-green-800 font-bold text-sm md:text-base">
              Toca cada parte para cambiar el animal

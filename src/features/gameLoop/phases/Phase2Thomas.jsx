@@ -16,7 +16,7 @@ const WINGS_OPTIONS = [
     label: 'Alas de pájaro',
     img: '/pajaro-alas.jpeg',
     isCorrect: false,
-    feedback: '¡Ups! Thomas con alas de pájaro se ve muy extraño. ¡Él no es un ave! 🐦',
+    feedback: '¡Ups! Thomas con alas de pájaro se ve muy extraño. ¡Él no es un ave! ',
     transformation: '/thomas-pajaro.jpeg'
   },
   {
@@ -47,18 +47,11 @@ export default function Phase2Thomas({ onComplete }) {
     setShowTransformation(true)
 
     if (option.isCorrect) {
-      // Victoria
       setTimeout(() => {
         setCompleted(true)
         setTimeout(() => onComplete(1), 3000)
       }, 2500)
-    } else {
-      // Error: mostrar transformación incorrecta por 2.5 segundos
-      setTimeout(() => {
-        setShowTransformation(false)
-        setSelectedWings(null)
-      }, 2500)
-    }
+    } 
   }
 
   const handleCloseTransformation = () => {
@@ -74,17 +67,28 @@ export default function Phase2Thomas({ onComplete }) {
       {/* Fondo */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/phase2-bg.jpg')" }}
+        style={{ backgroundImage: "url('/phase2-bg2.jpeg')" }}
       />
       
       {/* Capa oscura suave */}
       <div className="absolute inset-0 bg-black/30" />
 
-      {/* Thomas flotando arriba */}
-      <motion.div 
-        initial={{ y: -50, opacity: 0 }}
+      {/*  MARCA SUPERIOR: Detectives del Jardín */}
+      <motion.div
+        initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="relative z-10 mt-4 mb-2"
+        className="relative z-10 mt-2 mb-2 text-center"
+      >
+        <h1 className="text-2xl md:text-3xl font-bold text-white drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] tracking-wide">
+          Detectives del Jardín
+        </h1>
+      </motion.div>
+
+      {/* Thomas flotando */}
+      <motion.div 
+        initial={{ y: -30, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="relative z-10 mt-2 mb-2"
       >
         <motion.div
           animate={{ y: [0, -10, 0] }}
@@ -94,7 +98,7 @@ export default function Phase2Thomas({ onComplete }) {
           <img 
             src="/thomas-presentacion.jpeg"
             alt="Thomas el gusanito"
-            className="w-32 h-32 md:w-40 md:h-40 object-contain drop-shadow-2xl rounded-full border-4 border-white/50"
+            className="w-28 h-28 md:w-36 md:h-36 object-contain drop-shadow-2xl rounded-full border-4 border-white/50"
           />
         </motion.div>
       </motion.div>
@@ -104,9 +108,9 @@ export default function Phase2Thomas({ onComplete }) {
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ delay: 0.5 }}
-        className="relative z-10 text-center mb-6"
+        className="relative z-10 text-center mb-4"
       >
-        <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg mb-2">
+        <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow-lg mb-1">
           🦋 Elige las alas correctas
         </h2>
         <p className="text-white/90 text-sm md:text-base drop-shadow">
@@ -114,14 +118,13 @@ export default function Phase2Thomas({ onComplete }) {
         </p>
       </motion.div>
 
-           {/* Modal de Transformación -  FONDO COLORIDO DINÁMICO */}
+      {/* Modal de Transformación */}
       <AnimatePresence>
         {showTransformation && selectedWings && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={handleCloseTransformation}
             className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
           >
             <motion.div
@@ -129,15 +132,12 @@ export default function Phase2Thomas({ onComplete }) {
               animate={{ scale: 1, rotate: 0 }}
               exit={{ scale: 0 }}
               transition={{ type: 'spring', bounce: 0.6 }}
-              onClick={(e) => e.stopPropagation()}
-              // 🎨 CAMBIO: Fondo verde si es correcto, morado/rosa si es incorrecto
               className={`rounded-3xl p-6 text-center shadow-2xl max-w-md w-full border-4 border-white/50 ${
                 selectedWings.isCorrect
                   ? 'bg-gradient-to-br from-green-400 via-emerald-500 to-teal-500'
                   : 'bg-gradient-to-br from-purple-500 via-pink-500 to-rose-500'
               }`}
             >
-              {/* Imagen de Thomas transformado */}
               <motion.img
                 src={selectedWings.transformation}
                 alt={`Thomas con alas de ${selectedWings.label}`}
@@ -147,7 +147,6 @@ export default function Phase2Thomas({ onComplete }) {
                 transition={{ delay: 0.3, type: 'spring' }}
               />
 
-              {/* Mensaje */}
               {selectedWings.isCorrect ? (
                 <div>
                   <h3 className="text-2xl md:text-3xl font-bold text-white mb-2 drop-shadow-lg">
@@ -159,12 +158,17 @@ export default function Phase2Thomas({ onComplete }) {
                 </div>
               ) : (
                 <div>
-                  <p className="text-white text-lg font-bold mb-2 drop-shadow-lg">
+                  <p className="text-white text-lg font-bold mb-4 drop-shadow-lg px-2">
                     {selectedWings.feedback}
                   </p>
-                  <p className="text-white/80 text-sm drop-shadow">
-                    Toca para intentar de nuevo
-                  </p>
+                  <motion.button
+                    onClick={handleCloseTransformation}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    className="mt-2 px-8 py-3 bg-white text-purple-700 rounded-full font-bold text-lg shadow-lg hover:shadow-xl transition-all border-2 border-purple-200"
+                  >
+                    Intentar de nuevo 
+                  </motion.button>
                 </div>
               )}
             </motion.div>
@@ -217,8 +221,6 @@ export default function Phase2Thomas({ onComplete }) {
               alt={option.label}
               className="w-full h-full object-cover"
             />
-            
-            {/* Label */}
             <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
               <p className="text-white font-bold text-xs md:text-sm text-center drop-shadow-lg">
                 {option.label}
@@ -235,8 +237,20 @@ export default function Phase2Thomas({ onComplete }) {
         transition={{ delay: 1.5 }}
         className="relative z-10 mt-4 text-center"
       >
-        <p className="text-white font-semibold italic text-xs md:text-sm drop-shadow-lg bg-black/30 px-3 py-1 rounded-full inline-block">
-          "Cada cambio bien vivido, despierta un nuevo latido" 🦋
+        <p className="text-white font-semibold italic text-xs md:text-sm drop-shadow-lg bg-black/30 px-4 py-1.5 rounded-full inline-block">
+          "Cada cambio bien vivido, despierta un nuevo latido" 
+        </p>
+      </motion.div>
+
+      {/* 🌟 MARCA INFERIOR: Cuentos para crecer despacito */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 2 }}
+        className="relative z-10 mt-2 mb-2 text-center"
+      >
+        <p className="text-white/80 text-xs md:text-sm italic drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">
+          (Cuentos para crecer despacito)
         </p>
       </motion.div>
     </div>
