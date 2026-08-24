@@ -64,9 +64,10 @@ export default function MemoryGame({ pairs, onComplete }) {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col">
-      {/* Fondo */}
+        
+          {/* Fondo optimizado para móvil: prioriza la parte inferior (la ardilla) */}
       <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-bottom md:bg-center bg-no-repeat bg-amber-50"
         style={{ backgroundImage: "url('/level4-phases-bg.jpeg')" }}
       />
 
@@ -88,9 +89,9 @@ export default function MemoryGame({ pairs, onComplete }) {
         </div>
       </motion.div>
 
-      {/* Panel de cartas a la derecha */}
-      <div className="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 z-10">
-        <div className="grid grid-cols-2 gap-2 md:gap-3">
+          {/* Panel de cartas a la derecha (ajustado para no tapar a la ardilla en móvil) */}
+      <div className="absolute right-1 md:right-6 top-[40%] md:top-1/2 -translate-y-1/2 z-10">
+        <div className="grid grid-cols-2 gap-1.5 md:gap-3">
           {cards.map((card, index) => (
             <motion.button
               key={index}
@@ -103,8 +104,8 @@ export default function MemoryGame({ pairs, onComplete }) {
               whileTap={!isMatched(index) ? { scale: 0.95 } : {}}
               className="relative cursor-pointer"
               style={{ 
-                width: '70px', 
-                height: '70px',
+                width: '60px',   // Más pequeñas en móvil (60px)
+                height: '60px',  // Más pequeñas en móvil (60px)
                 perspective: '1000px'
               }}
             >

@@ -49,7 +49,7 @@ export default function Phase1BodyPuzzle({ onComplete }) {
       {/* FONDO: phase2-bg.jpg */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/phase2-bg.jpg')" }}
+        style={{ backgroundImage: "url('/phase2-bg2.jpeg')" }}
       />
       
       {/* Capa oscura muy suave para que las partes del cuerpo resalten sobre la imagen */}
