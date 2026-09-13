@@ -33,10 +33,10 @@ export default function AvatarSelection({ alias, onSelect }) {
         animate={{ opacity: 1, y: 0 }}
         className="text-center mb-8"
       >
-        <h2 className="text-4xl md:text-5xl font-bold text-white mb-2">
+        <h2 className="text-4xl md:text-5xl font-bold text-white mb-2 drop-shadow-lg">
           ¡Hola, <span className="text-yellow-300">{alias}</span>!
         </h2>
-        <p className="text-xl text-purple-200">
+        <p className="text-xl text-purple-200 drop-shadow">
           Toca un personaje para elegirlo
         </p>
       </motion.div>
@@ -52,32 +52,55 @@ export default function AvatarSelection({ alias, onSelect }) {
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: index * 0.05 }}
-              whileHover={{ scale: 1.08 }}
-              whileTap={{ scale: 0.92 }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={() => handleCharacterClick(char.id)}
               className={`
-                relative cursor-pointer rounded-2xl p-4 flex flex-col items-center justify-center text-center
-                border-4 transition-all duration-300
+                relative cursor-pointer rounded-2xl overflow-hidden aspect-square
+                border-4 transition-all duration-300 shadow-xl
                 ${isSelected 
-                  ? 'border-yellow-400 bg-white/20 shadow-[0_0_30px_rgba(250,204,21,0.6)]' 
-                  : 'border-white/10 bg-white/5 hover:bg-white/10 hover:border-white/30'}
+                  ? 'border-yellow-400 shadow-[0_0_30px_rgba(250,204,21,0.8)] ring-4 ring-yellow-400/50' 
+                  : 'border-white/20 hover:border-white/60'}
               `}
             >
-              {/* Emoji/Imagen del personaje */}
-              <div className={`text-6xl mb-3 drop-shadow-lg bg-linear-to-br ${char.color} w-20 h-20 rounded-full flex items-center justify-center`}>
-                {char.emoji}
-              </div>
+              {/* ✅ IMAGEN DE FONDO COMPLETA */}
+              <img 
+                src={char.avatar} 
+                alt={char.name} 
+                className="absolute inset-0 w-full h-full object-cover"
+                onError={(e) => {
+                  e.target.style.display = 'none'
+                  e.target.nextSibling.style.display = 'flex'
+                }}
+              />
               
-              {/* Nombre y Cuento */}
-              <h3 className="text-white font-bold text-lg leading-tight">{char.name}</h3>
-              <p className="text-purple-200 text-xs mt-1 italic">"{char.story}"</p>
+              {/* Fallback por si la imagen no carga */}
+              <div 
+                className="hidden absolute inset-0 items-center justify-center bg-linear-to-br"
+                style={{ background: `linear-gradient(to bottom right, var(--tw-gradient-stops))` }}
+              >
+                <span className="text-6xl">{char.emoji}</span>
+              </div>
+
+              {/* Degradado oscuro en la parte inferior para que el texto se lea bien */}
+              <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/90 via-black/50 to-transparent" />
+
+              {/* Nombre y Cuento superpuestos */}
+              <div className="absolute inset-x-0 bottom-0 p-3 text-center z-10">
+                <h3 className="text-white font-bold text-base md:text-lg leading-tight drop-shadow-lg">
+                  {char.name}
+                </h3>
+                <p className="text-white/80 text-[10px] md:text-xs mt-1 italic drop-shadow line-clamp-2">
+                  "{char.story}"
+                </p>
+              </div>
 
               {/* Indicador de selección */}
               {isSelected && (
                 <motion.div 
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  className="absolute -top-2 -right-2 bg-yellow-400 text-yellow-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-xl shadow-lg"
+                  className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 rounded-full w-8 h-8 flex items-center justify-center font-bold text-xl shadow-lg border-2 border-white z-20"
                 >
                   ✓
                 </motion.div>
@@ -103,26 +126,30 @@ export default function AvatarSelection({ alias, onSelect }) {
               exit={{ scale: 0, rotate: 10 }}
               transition={{ type: 'spring', bounce: 0.6 }}
               onClick={(e) => e.stopPropagation()}
-              className="bg-linear-to-br from-purple-600 via-pink-500 to-orange-500 rounded-3xl p-8 max-w-md w-full shadow-2xl relative"
+              className="bg-linear-to-br from-purple-600 via-pink-500 to-orange-500 rounded-3xl p-6 md:p-8 max-w-md w-full shadow-2xl relative overflow-hidden"
             >
               {/* Botón de cerrar */}
               <button
                 onClick={handleCloseModal}
-                className="absolute top-4 right-4 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-colors"
+                className="absolute top-3 right-3 w-10 h-10 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center text-white text-2xl font-bold transition-colors z-20"
               >
                 ✕
               </button>
 
               {/* Contenido del modal */}
-              <div className="text-center">
-                {/* Personaje grande */}
+              <div className="text-center relative z-10">
+                {/* ✅ PERSONAJE GRANDE - Imagen completa */}
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.2, type: 'spring', bounce: 0.8 }}
-                  className={`text-9xl mb-4 drop-shadow-2xl bg-white/20 w-40 h-40 rounded-full flex items-center justify-center mx-auto`}
+                  className="w-full h-56 md:h-64 mb-4 rounded-2xl overflow-hidden border-4 border-white/50 shadow-2xl mx-auto relative"
                 >
-                  {selectedCharacter.emoji}
+                  <img 
+                    src={selectedCharacter.avatar} 
+                    alt={selectedCharacter.name} 
+                    className="w-full h-full object-cover"
+                  />
                 </motion.div>
 
                 {/* Pregunta */}
@@ -130,7 +157,7 @@ export default function AvatarSelection({ alias, onSelect }) {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.3 }}
-                  className="text-3xl md:text-4xl font-bold text-white mb-2"
+                  className="text-2xl md:text-3xl font-bold text-white mb-2 drop-shadow-lg"
                 >
                   ¿Este es tu personaje?
                 </motion.h3>
@@ -139,7 +166,7 @@ export default function AvatarSelection({ alias, onSelect }) {
                   initial={{ y: 20, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
                   transition={{ delay: 0.4 }}
-                  className="text-xl text-white/90 mb-6"
+                  className="text-xl text-white/90 mb-6 drop-shadow"
                 >
                   {selectedCharacter.name}
                 </motion.p>
@@ -156,7 +183,7 @@ export default function AvatarSelection({ alias, onSelect }) {
                     onClick={handleConfirm}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-full py-5 bg-white text-purple-700 rounded-2xl text-2xl font-bold shadow-xl hover:shadow-2xl transition-all"
+                    className="w-full py-4 bg-white text-purple-700 rounded-2xl text-xl font-bold shadow-xl hover:shadow-2xl transition-all"
                   >
                     ¡Sí, es él! 🎉
                   </motion.button>
@@ -166,7 +193,7 @@ export default function AvatarSelection({ alias, onSelect }) {
                     onClick={handleCloseModal}
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-full py-5 bg-white/20 text-white rounded-2xl text-xl font-bold border-2 border-white/50 hover:bg-white/30 transition-all"
+                    className="w-full py-4 bg-white/20 text-white rounded-2xl text-lg font-bold border-2 border-white/50 hover:bg-white/30 transition-all"
                   >
                     Quiero elegir otro 🔄
                   </motion.button>

@@ -2,6 +2,9 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import AliasInput from './AliasInput'
 
+// ✅ 1. IMPORTAMOS EL HOOK DE AUDIO
+import { useAudio } from '../../context/AudioContext'
+
 // Partículas generadas fuera del componente para mantener pureza (evita error de ESLint)
 const PARTICLES = Array.from({ length: 15 }, (_, i) => ({
   id: i,
@@ -14,6 +17,9 @@ const PARTICLES = Array.from({ length: 15 }, (_, i) => ({
 
 export default function WelcomeScreen({ onComplete }) {
   const [showInput, setShowInput] = useState(false)
+  
+  // ✅ 2. OBTENEMOS LA FUNCIÓN PARA REPRODUCIR LA MÚSICA
+  const { playBGM } = useAudio()
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -24,6 +30,8 @@ export default function WelcomeScreen({ onComplete }) {
   }, [])
 
   const handleAliasSubmit = (validAlias) => {
+    // ✅ 3. INICIAMOS LA MÚSICA EN EL PRIMER CLIC/INTERACCIÓN REAL
+    playBGM()
     onComplete({ alias: validAlias })
   }
 
