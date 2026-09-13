@@ -62,7 +62,7 @@ export default function Phase1BodyPuzzle({ onComplete }) {
         className="relative z-10 text-center mb-6"
       >
         <h2 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg mb-2">
-           ¡Arma a Thomas!
+          ¡Arma a Thomas!
         </h2>
         <p className="text-sm md:text-base text-white/90 drop-shadow">
           Toca cada parte para encontrar las piezas correctas
@@ -102,7 +102,7 @@ export default function Phase1BodyPuzzle({ onComplete }) {
                   height: '120px'
                 }}
               >
-                <img 
+                <img
                   src={`/${currentAnimal}-${part.id}.jpeg`}
                   alt={`${currentAnimal} ${part.label}`}
                   className="w-full h-full object-cover"
@@ -171,7 +171,7 @@ export default function Phase1BodyPuzzle({ onComplete }) {
       <div className="relative z-10 mt-4 text-center">
         <div className="bg-white/90 rounded-full px-6 py-3 shadow-lg inline-block">
           <p className="text-green-800 font-bold text-sm md:text-base">
-             Toca cada parte para cambiar el animal
+            Toca cada parte para cambiar el animal
           </p>
         </div>
       </div>

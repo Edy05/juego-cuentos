@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 // Componente reutilizable para el juego de memoria
 export default function MemoryGame({ pairs, onComplete }) {
-  // ✅ CORRECCIÓN 1 y 3: Inicialización perezosa (lazy) para evitar setState en useEffect
+  // Inicialización perezosa para barajar las cartas
   const [cards] = useState(() => {
     const duplicated = [...pairs, ...pairs]
     return duplicated
@@ -17,7 +17,7 @@ export default function MemoryGame({ pairs, onComplete }) {
   const [disabled, setDisabled] = useState(false)
   const [showChest, setShowChest] = useState(false)
 
-  // ✅ CORRECCIÓN 4: Posiciones fijas precalculadas para evitar Math.random en el render
+  // Posiciones fijas precalculadas para los destellos
   const sparklePositions = useMemo(() => [
     { top: '25%', left: '15%' },
     { top: '30%', left: '80%' },
@@ -62,15 +62,16 @@ export default function MemoryGame({ pairs, onComplete }) {
   const isFlipped = (index) => flipped.includes(index) || matched.includes(index)
   const isMatched = (index) => matched.includes(index)
 
+  // ✅ Determinar si es Fase 2 (más pares) para ajustar el layout
+  const isPhase2 = pairs.length >= 4
+
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col">
-        
-          {/* Fondo optimizado para móvil: prioriza la parte inferior (la ardilla) */}
+              {/* Fondo: en móvil desplaza la imagen para mostrar más la ardilla a la izquierda */}
       <div 
-        className="absolute inset-0 bg-cover bg-bottom md:bg-center bg-no-repeat bg-amber-50"
+        className="absolute inset-0 bg-cover bg-[10%_center] md:bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/level4-phases-bg.jpeg')" }}
       />
-
       {/* Header */}
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
@@ -89,9 +90,13 @@ export default function MemoryGame({ pairs, onComplete }) {
         </div>
       </motion.div>
 
-          {/* Panel de cartas a la derecha (ajustado para no tapar a la ardilla en móvil) */}
-      <div className="absolute right-1 md:right-6 top-[40%] md:top-1/2 -translate-y-1/2 z-10">
-        <div className="grid grid-cols-2 gap-1.5 md:gap-3">
+          {/* Panel de cartas - MÁS GRANDES y mejor posicionado (más abajo para no tapar el header) */}
+      <div className="absolute right-2 md:right-8 top-[45%] md:top-1/2 -translate-y-1/2 z-10">
+        <div 
+          className={`grid gap-2 md:gap-3 ${
+            isPhase2 ? 'grid-cols-2' : 'grid-cols-2'
+          }`}
+        >
           {cards.map((card, index) => (
             <motion.button
               key={index}
@@ -104,8 +109,9 @@ export default function MemoryGame({ pairs, onComplete }) {
               whileTap={!isMatched(index) ? { scale: 0.95 } : {}}
               className="relative cursor-pointer"
               style={{ 
-                width: '60px',   // Más pequeñas en móvil (60px)
-                height: '60px',  // Más pequeñas en móvil (60px)
+                // ✅ Tamaños más grandes: 90px en móvil, 110px en tablet/desktop
+                width: 'clamp(85px, 22vw, 110px)', 
+                height: 'clamp(85px, 22vw, 110px)',
                 perspective: '1000px'
               }}
             >
@@ -117,11 +123,10 @@ export default function MemoryGame({ pairs, onComplete }) {
               >
                 {/* Cara trasera (dorso de la carta) */}
                 <div
-                  // ✅ CORRECCIÓN 5: bg-linear-to-br en lugar de bg-gradient-to-br
                   className="absolute inset-0 rounded-xl bg-linear-to-br from-amber-600 to-orange-700 border-2 border-amber-400 shadow-lg flex items-center justify-center"
                   style={{ backfaceVisibility: 'hidden' }}
                 >
-                  <span className="text-2xl">🍂</span>
+                  <span className="text-3xl md:text-4xl">🍂</span>
                 </div>
 
                 {/* Cara frontal (imagen) */}
@@ -143,7 +148,7 @@ export default function MemoryGame({ pairs, onComplete }) {
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="absolute top-1 right-1 bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow"
+                      className="absolute top-1 right-1 bg-green-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold shadow"
                     >
                       ✓
                     </motion.div>
@@ -167,7 +172,6 @@ export default function MemoryGame({ pairs, onComplete }) {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', bounce: 0.6 }}
-              // ✅ CORRECCIÓN 5: bg-linear-to-br
               className="bg-linear-to-br from-amber-400 via-yellow-500 to-orange-600 rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full border-4 border-yellow-300 relative"
             >
               {/* Animación del cofre */}
@@ -196,7 +200,7 @@ export default function MemoryGame({ pairs, onComplete }) {
                 </p>
               </motion.div>
 
-              {/* Destellos con posiciones precalculadas (puro) */}
+              {/* Destellos con posiciones precalculadas */}
               {sparklePositions.map((pos, i) => (
                 <motion.div
                   key={i}

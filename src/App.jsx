@@ -8,6 +8,10 @@ import GameLoop from './features/gameLoop/GameLoop'
 import { useGameProgress } from './hooks/useGameProgress'
 import localforage from 'localforage'
 
+// ✅ 1. NUEVOS IMPORTS PARA EL SISTEMA DE AUDIO
+import { AudioProvider } from './context/AudioContext'
+import MuteButton from './components/MuteButton'
+
 function App() {
   const [step, setStep] = useState('welcome')
   const [userData, setUserData] = useState({ alias: '', character: null })
@@ -75,33 +79,41 @@ function App() {
   }
 
   return (
-    <div className="font-sans antialiased text-gray-900">
-      {step === 'welcome' && <WelcomeScreen onComplete={handleAliasComplete} />}
-      
-      {step === 'avatar' && (
-        <AvatarSelection alias={userData.alias} onSelect={handleAvatarSelect} />
-      )}
+    // ✅ 2. ENVOLVEMOS TODA LA APP CON EL PROVEEDOR DE AUDIO
+    <AudioProvider>
+      <div className="font-sans antialiased text-gray-900 relative min-h-screen">
+        
+        {/* ✅ 3. BOTÓN DE MUTE GLOBAL (Siempre visible en la esquina superior derecha) */}
+        <MuteButton />
 
-      {step === 'confirmation' && (
-        <ConfirmationScreen userData={userData} onStartGame={handleStartGame} />
-      )}
+        {/* Renderizado condicional de las pantallas */}
+        {step === 'welcome' && <WelcomeScreen onComplete={handleAliasComplete} />}
+        
+        {step === 'avatar' && (
+          <AvatarSelection alias={userData.alias} onSelect={handleAvatarSelect} />
+        )}
 
-      {step === 'levelSelector' && (
-        <LevelSelector 
-          progress={progress}
-          onSelectLevel={handleSelectLevel}
-          onExit={handleExitToWelcome}
-        />
-      )}
+        {step === 'confirmation' && (
+          <ConfirmationScreen userData={userData} onStartGame={handleStartGame} />
+        )}
 
-      {step === 'game' && selectedLevel && (
-        <GameLoop 
-          level={selectedLevel}
-          onComplete={handleLevelComplete}
-          onExit={handleExitLevel}
-        />
-      )}
-    </div>
+        {step === 'levelSelector' && (
+          <LevelSelector 
+            progress={progress}
+            onSelectLevel={handleSelectLevel}
+            onExit={handleExitToWelcome}
+          />
+        )}
+
+        {step === 'game' && selectedLevel && (
+          <GameLoop 
+            level={selectedLevel}
+            onComplete={handleLevelComplete}
+            onExit={handleExitLevel}
+          />
+        )}
+      </div>
+    </AudioProvider>
   )
 }
 
