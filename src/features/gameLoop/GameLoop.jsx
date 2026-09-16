@@ -3,9 +3,12 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Phase1Detective from './phases/Phase1Detective'
 import Phase1BodyPuzzle from './phases/Phase1BodyPuzzle'
 import Phase1PathFinder from './phases/Phase1PathFinder'
+import Phase1ClaritaPaths from './phases/Phase1ClaritaPaths'
+import Phase1SimonDifferences from './phases/Phase1SimonDifferences'
 import MemoryGame from './phases/MemoryGame'
 import Phase2Quiz from './phases/Phase2Quiz'
 import Phase2Thomas from './phases/Phase2Thomas'
+import Phase2SimonLake from './phases/Phase2SimonLake' // ✅ NUEVO
 
 export default function GameLoop({ level, onComplete, onExit }) {
   const [currentPhase, setCurrentPhase] = useState(1)
@@ -66,13 +69,14 @@ export default function GameLoop({ level, onComplete, onExit }) {
             >
               {level.id === 1 && <Phase1Detective onComplete={handlePhaseComplete} />}
               {level.id === 2 && <Phase1BodyPuzzle onComplete={handlePhaseComplete} />}
-              {level.id === 3 && <Phase1PathFinder onComplete={handlePhaseComplete} />}
+              {level.id === 3 && <Phase1ClaritaPaths onComplete={handlePhaseComplete} />}
               {level.id === 4 && (
                 <MemoryGame 
                   pairs={['memory1', 'memory2', 'memory3']} 
                   onComplete={handlePhaseComplete} 
                 />
               )}
+              {level.id === 5 && <Phase1SimonDifferences onComplete={handlePhaseComplete} />}
             </motion.div>
           )}
 
@@ -86,13 +90,15 @@ export default function GameLoop({ level, onComplete, onExit }) {
             >
               {level.id === 1 && <Phase2Quiz level={level} onComplete={handlePhaseComplete} />}
               {level.id === 2 && <Phase2Thomas onComplete={handlePhaseComplete} />}
-              {level.id === 3 && <Phase2Quiz level={level} onComplete={handlePhaseComplete} />}
+              {level.id === 3 && <Phase1PathFinder onComplete={handlePhaseComplete} />}
               {level.id === 4 && (
                 <MemoryGame 
                   pairs={['memory4', 'memory5', 'memory6', 'memory7']} 
                   onComplete={handlePhaseComplete} 
                 />
               )}
+              {/* ✅ CAMBIO: Nivel 5 usa el juego del lago */}
+              {level.id === 5 && <Phase2SimonLake onComplete={handlePhaseComplete} />}
             </motion.div>
           )}
 
@@ -106,7 +112,6 @@ export default function GameLoop({ level, onComplete, onExit }) {
             >
               <div className="text-center p-8">
                 <h2 className="text-4xl font-bold mb-4">🔍 Fase 3: Próximamente</h2>
-                <p className="text-xl">Aquí irá el objeto escondido</p>
                 <button
                   onClick={() => onComplete(starsEarned)}
                   className="mt-8 px-8 py-4 bg-purple-600 rounded-xl text-xl font-bold hover:bg-purple-700"

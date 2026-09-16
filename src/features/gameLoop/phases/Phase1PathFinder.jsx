@@ -7,13 +7,12 @@ const ANIMALS = [
     id: 'bee',
     emoji: '🐝',
     label: 'Abeja',
-    homeEmoji: '🍯',
+    homeEmoji: '🍯', // ✅ Cambiado a pote de miel (se ve en todos los dispositivos)
     homeLabel: 'Panal',
-    image: '/abeja-home.jpeg', // ✅ Imagen al llegar al hogar
-    startX: 20,
-    startY: 60,
-    homeX: 20,
-    homeY: 20,
+    image: '/abeja-home.jpeg',
+    startX: 15,
+    homeX: 70,
+    y: 28,
     message: '¡La abeja voló hacia su panal!'
   },
   {
@@ -22,48 +21,42 @@ const ANIMALS = [
     label: 'Ardilla',
     homeEmoji: '🏡',
     homeLabel: 'Madriguera',
-    image: '/ardilla-home.jpeg', // ✅ Imagen al llegar al hogar
-    startX: 50,
-    startY: 65,
-    homeX: 50,
-    homeY: 15,
+    image: '/ardilla-home.jpeg',
+    startX: 15,
+    homeX: 70,
+    y: 50,
     message: '¡La ardilla corrió a su madriguera!'
   },
   {
     id: 'ladybug',
-    emoji: '🐞', // ✅ CORREGIDO: emoji de mariquita visible
+    emoji: '🐞',
     label: 'Mariquita',
     homeEmoji: '🌸',
     homeLabel: 'Flor',
-    image: '/mariquita-home.jpeg', // ✅ Imagen al llegar al hogar
-    startX: 80,
-    startY: 60,
-    homeX: 80,
-    homeY: 20,
+    image: '/mariquita-home.jpeg',
+    startX: 15,
+    homeX: 70,
+    y: 72,
     message: '¡La mariquita voló hacia su flor!'
   }
 ]
 
 export default function Phase1PathFinder({ onComplete }) {
   const [movedAnimals, setMovedAnimals] = useState({})
-  const [currentImage, setCurrentImage] = useState(null) // ✅ Nuevo estado para el modal de imagen
+  const [currentImage, setCurrentImage] = useState(null)
   const [completed, setCompleted] = useState(false)
 
   const handleAnimalClick = (animal) => {
     if (movedAnimals[animal.id]) return
 
-    // Marcar como movido
     setMovedAnimals(prev => ({ ...prev, [animal.id]: true }))
 
-    // Después de 4 segundos (cuando termine la animación), mostrar la imagen
     setTimeout(() => {
       setCurrentImage(animal)
       
-      // Cerrar el modal de imagen después de 2.5 segundos
       setTimeout(() => {
         setCurrentImage(null)
         
-        // Verificar si todos se movieron para mostrar victoria
         const newMoved = { ...movedAnimals, [animal.id]: true }
         if (Object.keys(newMoved).length === ANIMALS.length) {
           setTimeout(() => {
@@ -72,15 +65,15 @@ export default function Phase1PathFinder({ onComplete }) {
           }, 500)
         }
       }, 2500)
-    }, 4000) // Esperar los 4 segundos de la animación
+    }, 4000)
   }
 
   return (
-    <div className="min-h-screen relative overflow-hidden flex flex-col">
+    <div className="h-screen relative overflow-hidden flex flex-col">
       
-      {/* Fondo del nivel */}
+      {/* Fondo completo sin capa blanca */}
       <div 
-        className="absolute inset-0 bg-cover bg-bottom md:bg-center bg-no-repeat"
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/level3-phase1-bg.jpeg')" }}
       />
 
@@ -88,47 +81,19 @@ export default function Phase1PathFinder({ onComplete }) {
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
-        className="relative z-10 pt-4 px-4"
+        className="relative z-10 pt-4 px-4 text-center"
       >
         <div className="bg-white/90 backdrop-blur-sm rounded-full px-5 py-2 inline-block shadow-md">
           <p className="text-amber-800 font-bold text-sm md:text-base">
-            🐜 Ayuda a cada animal a encontrar su hogar
-          </p>
-        </div>
-        <div className="mt-2 bg-white/70 rounded-full px-4 py-1 inline-block ml-2">
-          <p className="text-amber-700 font-semibold text-xs">
-            Animales en casa: {Object.keys(movedAnimals).length} / {ANIMALS.length}
+             Une cada animal con su hogar
           </p>
         </div>
       </motion.div>
 
-      {/* Hogares (siempre visibles arriba) */}
-      <div className="absolute inset-0 z-10 pointer-events-none">
-        {ANIMALS.map((animal) => (
-          <motion.div
-            key={`home-${animal.id}`}
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.5, type: 'spring' }}
-            className="absolute flex flex-col items-center"
-            style={{
-              left: `${animal.homeX}%`,
-              top: `${animal.homeY}%`,
-              transform: 'translate(-50%, -50%)'
-            }}
-          >
-            <span className="text-5xl md:text-6xl drop-shadow-lg">
-              {animal.homeEmoji}
-            </span>
-            <span className="text-xs md:text-sm font-bold text-white bg-black/40 px-2 py-0.5 rounded-full mt-1">
-              {animal.homeLabel}
-            </span>
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Animales (se mueven al tocarlos) */}
-      <div className="absolute inset-0 z-10">
+      {/* Contenedor principal del juego */}
+      <div className="absolute inset-0 pt-20 pb-10 z-10">
+        
+        {/* Animales (columna izquierda) */}
         {ANIMALS.map((animal, index) => {
           const isMoved = movedAnimals[animal.id]
           
@@ -136,31 +101,26 @@ export default function Phase1PathFinder({ onComplete }) {
             <motion.button
               key={animal.id}
               onClick={() => handleAnimalClick(animal)}
-              initial={{ 
-                scale: 0,
-                x: 0,
-                y: 0
-              }}
+              initial={{ scale: 0 }}
               animate={{ 
                 scale: 1,
                 x: isMoved ? (animal.homeX - animal.startX) * 10 : 0,
-                y: isMoved ? (animal.homeY - animal.startY) * 10 : 0
               }}
               transition={{ 
                 delay: 0.3 + index * 0.1,
                 type: 'spring',
                 stiffness: 100
               }}
-              whileHover={!isMoved ? { scale: 1.2 } : {}}
+              whileHover={!isMoved ? { scale: 1.15, rotate: [-5, 5, -5, 0] } : {}}
               whileTap={!isMoved ? { scale: 0.9 } : {}}
               className={`absolute flex flex-col items-center cursor-pointer ${
                 isMoved ? 'pointer-events-none opacity-0' : ''
               }`}
               style={{
                 left: `${animal.startX}%`,
-                top: `${animal.startY}%`,
+                top: `${animal.y}%`,
                 transform: 'translate(-50%, -50%)',
-                transition: isMoved ? 'all 4s ease-in-out' : 'none'
+                transition: isMoved ? 'all 4s cubic-bezier(0.4, 0, 0.2, 1)' : 'none'
               }}
             >
               <motion.span 
@@ -173,15 +133,48 @@ export default function Phase1PathFinder({ onComplete }) {
               >
                 {animal.emoji}
               </motion.span>
-              <span className="text-xs md:text-sm font-bold text-white bg-black/40 px-2 py-0.5 rounded-full mt-1">
+              <span className="text-xs md:text-sm font-bold text-white bg-black/40 px-3 py-1 rounded-full mt-2 drop-shadow-lg">
                 {animal.label}
               </span>
             </motion.button>
           )
         })}
+
+        {/* Hogares (columna derecha) */}
+        {ANIMALS.map((animal, index) => (
+          <motion.div
+            key={`home-${animal.id}`}
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ delay: 0.5 + index * 0.1, type: 'spring' }}
+            className="absolute flex flex-col items-center"
+            style={{
+              left: `${animal.homeX}%`,
+              top: `${animal.y}%`,
+              transform: 'translate(-50%, -50%)'
+            }}
+          >
+            {/* ✅ Aro amarillo eliminado. Ahora es un círculo sutil y limpio */}
+            <div className="w-20 h-20 md:w-28 md:h-28 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center shadow-lg">
+              <span className="text-4xl md:text-5xl drop-shadow-lg">
+                {animal.homeEmoji}
+              </span>
+            </div>
+            <span className="text-xs md:text-sm font-bold text-white bg-black/40 px-3 py-1 rounded-full mt-2 drop-shadow-lg">
+              {animal.homeLabel}
+            </span>
+          </motion.div>
+        ))}
       </div>
 
-      {/* ✅ MODAL DE IMAGEN LIMPIA - Aparece cuando el animal llega a su hogar */}
+      {/* Instrucciones */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
+        <p className="text-white text-xs md:text-sm font-bold bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg">
+          Toca un animal para enviarlo a su hogar
+        </p>
+      </div>
+
+      {/* Modal de imagen limpia */}
       <AnimatePresence>
         {currentImage && (
           <motion.div
@@ -195,24 +188,22 @@ export default function Phase1PathFinder({ onComplete }) {
               animate={{ scale: 1, y: 0 }}
               exit={{ scale: 0.5, y: 50 }}
               transition={{ type: 'spring', bounce: 0.5 }}
-              className="relative"
+              className="relative flex flex-col items-center"
             >
-              {/* Imagen limpia sin fondo de tarjeta */}
               <motion.img
                 src={currentImage.image}
                 alt={currentImage.message}
-                className="max-w-[80vw] max-h-[70vh] object-contain drop-shadow-2xl"
+                className="max-w-[80vw] max-h-[65vh] object-contain drop-shadow-2xl"
                 initial={{ scale: 0.8 }}
                 animate={{ scale: 1 }}
                 transition={{ delay: 0.2, type: 'spring' }}
               />
               
-              {/* Mensaje flotante debajo de la imagen */}
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}
-                className="text-white text-xl md:text-2xl font-bold text-center mt-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]"
+                className="text-white text-xl md:text-2xl font-bold text-center mt-4 drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] bg-black/30 px-4 py-2 rounded-full"
               >
                 {currentImage.message} ✨
               </motion.p>
@@ -246,13 +237,6 @@ export default function Phase1PathFinder({ onComplete }) {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Instrucciones */}
-      <div className="relative z-10 mt-auto mb-6 text-center px-4">
-        <p className="text-white text-xs md:text-sm font-bold bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full inline-block shadow-lg">
-          Toca cada animal para llevarlo a su hogar
-        </p>
-      </div>
     </div>
   )
 }
