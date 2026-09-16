@@ -143,6 +143,42 @@ export const levels = [
   phase2CorrectAnswer: 0,
   phase3HiddenObject: '',
   phase3Hint: 'Busca la flor escondida en el jardín'
-}
+},
 
+
+// Nivel 5: Simon el caracol que llego primero
+{
+  id: 5,
+  characterId: 5, 
+  characterName: "Simón",
+  storyTitle: "El caracol que llegó primero",
+  emoji: "🐌",
+  color: "from-amber-300 to-orange-400",
+  phase2Question: "¿Qué harías tú si fueras Simón?",
+  phase2Options: [
+    {
+      id: 1,
+      emoji: '⏳',
+      label: 'Esperar con paciencia',
+      isCorrect: true
+    },
+    {
+      id: 2,
+      emoji: '😤',
+      label: 'Correr muy rápido',
+      isCorrect: false,
+      feedback: '¡Recuerda que Simón ganó por saber esperar!'
+    },
+    {
+      id: 3,
+      emoji: '',
+      label: 'Rendirme y no buscar',
+      isCorrect: false,
+      feedback: '¡Simón nunca se rindió, él tuvo paciencia!'
+    }
+  ],
+  phase2CorrectAnswer: 0,
+  phase3HiddenObject: '',
+  phase3Hint: 'Busca la flor azul escondida'
+}
 ]
