@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Phase1Detective from './phases/Phase1Detective'
 import Phase1BodyPuzzle from './phases/Phase1BodyPuzzle'
@@ -8,11 +8,23 @@ import Phase1SimonDifferences from './phases/Phase1SimonDifferences'
 import MemoryGame from './phases/MemoryGame'
 import Phase2Quiz from './phases/Phase2Quiz'
 import Phase2Thomas from './phases/Phase2Thomas'
-import Phase2SimonLake from './phases/Phase2SimonLake' // ✅ NUEVO
+import Phase2SimonLake from './phases/Phase2SimonLake'
+
+// ✅ IMPORTS PARA PRECARGA GLOBAL
+import useImagePreloader from '../../hooks/useImagePreloader'
+import ImageLoader from '../../components/ImageLoader'
+import { levelImages, defaultImages } from '../../data/gameImages'
 
 export default function GameLoop({ level, onComplete, onExit }) {
   const [currentPhase, setCurrentPhase] = useState(1)
   const [starsEarned, setStarsEarned] = useState(0)
+
+  // ✅ PRECARGA GLOBAL: Obtiene las imágenes del nivel actual
+  const imagesToLoad = useMemo(
+    () => levelImages[level.id] || defaultImages,
+    [level.id]
+  )
+  const { isLoaded, progress } = useImagePreloader(imagesToLoad)
 
   const handlePhaseComplete = (stars) => {
     setStarsEarned(prev => prev + stars)
@@ -22,6 +34,11 @@ export default function GameLoop({ level, onComplete, onExit }) {
     } else if (currentPhase === 2) {
       setTimeout(() => onComplete(starsEarned + stars), 4500)
     }
+  }
+
+  // ✅ LOADER GLOBAL: Se muestra mientras precarga las imágenes del nivel
+  if (!isLoaded) {
+    return <ImageLoader progress={progress} />
   }
 
   return (
@@ -97,7 +114,6 @@ export default function GameLoop({ level, onComplete, onExit }) {
                   onComplete={handlePhaseComplete} 
                 />
               )}
-              {/* ✅ CAMBIO: Nivel 5 usa el juego del lago */}
               {level.id === 5 && <Phase2SimonLake onComplete={handlePhaseComplete} />}
             </motion.div>
           )}

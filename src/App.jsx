@@ -8,9 +8,12 @@ import GameLoop from './features/gameLoop/GameLoop'
 import { useGameProgress } from './hooks/useGameProgress'
 import localforage from 'localforage'
 
-// ✅ 1. NUEVOS IMPORTS PARA EL SISTEMA DE AUDIO
+// ✅ IMPORTS PARA EL SISTEMA DE AUDIO
 import { AudioProvider } from './context/AudioContext'
 import MuteButton from './components/MuteButton'
+
+// ✅ NUEVO IMPORT: Cargador Global de la App
+import GlobalAppLoader from './components/GlobalAppLoader'
 
 function App() {
   const [step, setStep] = useState('welcome')
@@ -79,40 +82,46 @@ function App() {
   }
 
   return (
-    // ✅ 2. ENVOLVEMOS TODA LA APP CON EL PROVEEDOR DE AUDIO
+    // ✅ 1. PROVEEDOR DE AUDIO (primero, para que todo tenga acceso al sonido)
     <AudioProvider>
-      <div className="font-sans antialiased text-gray-900 relative min-h-screen">
+      
+      {/* ✅ 2. CARGADOR GLOBAL (precarga imágenes antes de mostrar la app) */}
+      <GlobalAppLoader>
         
-        {/* ✅ 3. BOTÓN DE MUTE GLOBAL (Siempre visible en la esquina superior derecha) */}
-        <MuteButton />
+        <div className="font-sans antialiased text-gray-900 relative min-h-screen">
+          
+          {/* ✅ 3. BOTÓN DE MUTE (aparece solo cuando la app ya cargó) */}
+          <MuteButton />
 
-        {/* Renderizado condicional de las pantallas */}
-        {step === 'welcome' && <WelcomeScreen onComplete={handleAliasComplete} />}
+          {/* Renderizado condicional de las pantallas */}
+          {step === 'welcome' && <WelcomeScreen onComplete={handleAliasComplete} />}
+          
+          {step === 'avatar' && (
+            <AvatarSelection alias={userData.alias} onSelect={handleAvatarSelect} />
+          )}
+
+          {step === 'confirmation' && (
+            <ConfirmationScreen userData={userData} onStartGame={handleStartGame} />
+          )}
+
+          {step === 'levelSelector' && (
+            <LevelSelector 
+              progress={progress}
+              onSelectLevel={handleSelectLevel}
+              onExit={handleExitToWelcome}
+            />
+          )}
+
+          {step === 'game' && selectedLevel && (
+            <GameLoop 
+              level={selectedLevel}
+              onComplete={handleLevelComplete}
+              onExit={handleExitLevel}
+            />
+          )}
+        </div>
         
-        {step === 'avatar' && (
-          <AvatarSelection alias={userData.alias} onSelect={handleAvatarSelect} />
-        )}
-
-        {step === 'confirmation' && (
-          <ConfirmationScreen userData={userData} onStartGame={handleStartGame} />
-        )}
-
-        {step === 'levelSelector' && (
-          <LevelSelector 
-            progress={progress}
-            onSelectLevel={handleSelectLevel}
-            onExit={handleExitToWelcome}
-          />
-        )}
-
-        {step === 'game' && selectedLevel && (
-          <GameLoop 
-            level={selectedLevel}
-            onComplete={handleLevelComplete}
-            onExit={handleExitLevel}
-          />
-        )}
-      </div>
+      </GlobalAppLoader>
     </AudioProvider>
   )
 }
