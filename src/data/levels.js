@@ -180,5 +180,41 @@ export const levels = [
   phase2CorrectAnswer: 0,
   phase3HiddenObject: '',
   phase3Hint: 'Busca la flor azul escondida'
+},
+
+{
+  id: 6,
+  characterId: 6, 
+  characterName: "Rojolet",
+  storyTitle: "El cardenal que perdía su color",
+  emoji: "",
+  color: "from-red-400 to-orange-500",
+  phase2Question: "¿Qué aprendió Rojolet sobre la amistad?",
+  phase2Options: [
+    {
+      id: 1,
+      emoji: '🤝',
+      label: 'Que debe dar el primer paso',
+      isCorrect: true
+    },
+    {
+      id: 2,
+      emoji: '',
+      label: 'Que debe esperar a que otros se acerquen',
+      isCorrect: false,
+      feedback: 'Rojolet aprendió que él mismo debe iniciar la amistad'
+    },
+    {
+      id: 3,
+      emoji: '🎨',
+      label: 'Que solo necesita verse bonito',
+      isCorrect: false,
+      feedback: 'El color volvió cuando hizo amigos, no al revés'
+    }
+  ],
+  phase2CorrectAnswer: 0,
+  phase3HiddenObject: '',
+  phase3Hint: 'Busca el objeto escondido'
 }
+
 ]

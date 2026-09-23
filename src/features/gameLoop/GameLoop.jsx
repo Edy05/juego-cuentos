@@ -5,6 +5,7 @@ import Phase1BodyPuzzle from './phases/Phase1BodyPuzzle'
 import Phase1PathFinder from './phases/Phase1PathFinder'
 import Phase1ClaritaPaths from './phases/Phase1ClaritaPaths'
 import Phase1SimonDifferences from './phases/Phase1SimonDifferences'
+import Phase1RojoletCatch from './phases/Phase1RojoletCatch' // ✅ NUEVO
 import MemoryGame from './phases/MemoryGame'
 import Phase2Quiz from './phases/Phase2Quiz'
 import Phase2Thomas from './phases/Phase2Thomas'
@@ -94,6 +95,8 @@ export default function GameLoop({ level, onComplete, onExit }) {
                 />
               )}
               {level.id === 5 && <Phase1SimonDifferences onComplete={handlePhaseComplete} />}
+              {/* ✅ CAMBIO: Nivel 6 usa el juego de atrapar objetos */}
+              {level.id === 6 && <Phase1RojoletCatch onComplete={handlePhaseComplete} />}
             </motion.div>
           )}
 
@@ -115,6 +118,8 @@ export default function GameLoop({ level, onComplete, onExit }) {
                 />
               )}
               {level.id === 5 && <Phase2SimonLake onComplete={handlePhaseComplete} />}
+              {/* ✅ CAMBIO: Nivel 6 usa el Quiz estándar para la Fase 2 */}
+              {level.id === 6 && <Phase2Quiz level={level} onComplete={handlePhaseComplete} />}
             </motion.div>
           )}
 

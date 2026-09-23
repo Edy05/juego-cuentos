@@ -65,7 +65,14 @@ export const levelImages = {
     '/simon-crossing.jpeg',
     '/simon-happy.jpeg',
   ],
+
+6: [
+  // Nivel 6: Rojolet (Atrapar objetos + Quiz)
+  '/rojolet-sin-color.jpeg',
+  '/rojolet-con-color.jpeg',
+],
 }
+
 
 // Imágenes por defecto (si por alguna razón se pide un nivel no mapeado)
 export const defaultImages = []
