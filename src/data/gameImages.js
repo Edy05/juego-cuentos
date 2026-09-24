@@ -70,6 +70,7 @@ export const levelImages = {
   // Nivel 6: Rojolet (Atrapar objetos + Quiz)
   '/rojolet-sin-color.jpeg',
   '/rojolet-con-color.jpeg',
+  '/rojolet-bosque-bg.jpeg', 
 ],
 }
 

@@ -10,7 +10,7 @@ export const AudioProvider = ({ children }) => {
   const bgmRef = useRef(null)
 
   useEffect(() => {
-    bgmRef.current = new Audio('/audio/bg-magic.m4a')
+    bgmRef.current = new Audio('/audio/bg-magic.mp3')
     bgmRef.current.loop = true
     bgmRef.current.volume = 0.3
   }, [])

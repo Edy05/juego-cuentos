@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-// ✅ CORREGIDO: Subimos a Clarita (la hormiga) para que no la tape el contador de abajo
+// Amigos escondidos en el bosque
+// Ajusta los valores de x e y (en %) para que coincidan con los elementos de tu foto de fondo
 const HIDDEN_FRIENDS = [
   { id: 'thomas', emoji: '🐛', x: 22, y: 75, label: 'Thomas el gusanito' },
-  { id: 'rojita', emoji: '🐿️', x: 78, y: 35, label: 'Rojita la ardilla' },
-  { id: 'clarita', emoji: '🐜', x: 38, y: 70, label: 'Clarita la hormiga' }, // ✅ Cambiado de 88 a 70
+  { id: 'rojita', emoji: '️', x: 78, y: 35, label: 'Rojita la ardilla' },
+  { id: 'clarita', emoji: '🐜', x: 38, y: 88, label: 'Clarita la hormiga' },
   { id: 'simon', emoji: '🐌', x: 65, y: 62, label: 'Simón el caracol' }
 ]
 
@@ -71,12 +72,17 @@ export default function Phase2RojoletFriends({ onComplete }) {
               whileHover={!isFound ? { scale: 1.2 } : {}}
               whileTap={!isFound ? { scale: 0.9 } : {}}
             >
+              {/* 
+                Efecto camuflaje: 
+                Si no está encontrado, tiene un poco de transparencia y está un poco más pequeño.
+              */}
               <span className={`text-4xl md:text-5xl drop-shadow-lg transition-all duration-500 ${
                 isFound ? 'opacity-100 scale-110' : 'opacity-75 scale-90 blur-[0.5px]'
               }`}>
                 {friend.emoji}
               </span>
 
+              {/* Círculo verde cuando se encuentra */}
               {isFound && (
                 <motion.div
                   initial={{ scale: 0, opacity: 0 }}
@@ -112,7 +118,7 @@ export default function Phase2RojoletFriends({ onComplete }) {
               transition={{ type: 'spring', bounce: 0.6 }}
               className="bg-linear-to-br from-red-400 via-orange-500 to-yellow-500 rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full border-4 border-yellow-300"
             >
-              <div className="text-7xl mb-3">🐦</div>
+              <div className="text-7xl mb-3"></div>
               <h3 className="text-2xl md:text-3xl font-bold text-white mb-3 drop-shadow-lg">
                 ¡Encontraste a todos!
               </h3>
