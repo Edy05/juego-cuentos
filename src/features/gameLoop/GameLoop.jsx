@@ -1,128 +1,88 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-// ✅ CORREGIDO: Subimos a Clarita (la hormiga) para que no la tape el contador de abajo
-const HIDDEN_FRIENDS = [
-  { id: 'thomas', emoji: '🐛', x: 22, y: 75, label: 'Thomas el gusanito' },
-  { id: 'rojita', emoji: '🐿️', x: 78, y: 35, label: 'Rojita la ardilla' },
-  { id: 'clarita', emoji: '🐜', x: 38, y: 70, label: 'Clarita la hormiga' }, // ✅ Cambiado de 88 a 70
-  { id: 'simon', emoji: '🐌', x: 65, y: 62, label: 'Simón el caracol' }
-]
+// Fases 1
+import Phase1Detective from './phases/Phase1Detective'
+import Phase1BodyPuzzle from './phases/Phase1BodyPuzzle'
+import Phase1PathFinder from './phases/Phase1PathFinder'
+import Phase1ClaritaPaths from './phases/Phase1ClaritaPaths'
+import Phase1SimonDifferences from './phases/Phase1SimonDifferences'
+import Phase1RojoletCatch from './phases/Phase1RojoletCatch'
 
-export default function Phase2RojoletFriends({ onComplete }) {
-  const [found, setFound] = useState([])
-  const [completed, setCompleted] = useState(false)
+// Fases 2
+import Phase2Quiz from './phases/Phase2Quiz'
+import Phase2Thomas from './phases/Phase2Thomas'
+import Phase2SimonLake from './phases/Phase2SimonLake'
+import Phase2RojoletFriends from './phases/Phase2RojoletFriends'
 
-  const handleFriendClick = (friend) => {
-    if (found.includes(friend.id)) return
-    
-    const newFound = [...found, friend.id]
-    setFound(newFound)
+// Utilidades
+import MemoryGame from './phases/MemoryGame'
+import useImagePreloader from '../../hooks/useImagePreloader'
+import ImageLoader from '../../components/ImageLoader'
+import { levelImages, defaultImages } from '../../data/gameImages'
 
-    if (newFound.length === HIDDEN_FRIENDS.length) {
-      setTimeout(() => {
-        setCompleted(true)
-        setTimeout(() => onComplete(1), 3000)
-      }, 1000)
+export default function GameLoop({ level, onComplete, onExit }) {
+  const [currentPhase, setCurrentPhase] = useState(1)
+  const [starsEarned, setStarsEarned] = useState(0)
+
+  const imagesToLoad = useMemo(() => levelImages[level.id] || defaultImages, [level.id])
+  const { isLoaded, progress } = useImagePreloader(imagesToLoad)
+
+  const handlePhaseComplete = (stars) => {
+    setStarsEarned(prev => prev + stars)
+    if (currentPhase === 1) {
+      setTimeout(() => setCurrentPhase(2), 4500)
+    } else if (currentPhase === 2) {
+      setTimeout(() => onComplete(starsEarned + stars), 4500)
     }
   }
 
+  if (!isLoaded) {
+    return <ImageLoader progress={progress} />
+  }
+
   return (
-    <div className="h-screen relative overflow-hidden flex flex-col">
-      
-      {/* Fondo del bosque */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: "url('/rojolet-bosque-bg.jpeg')" }}
-      />
-
-      {/* Header flotante */}
-      <motion.div 
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        className="absolute top-20 left-4 z-20"
-      >
-        <div className="bg-white/90 backdrop-blur-sm rounded-full px-4 py-2 shadow-md">
-          <p className="text-red-800 font-bold text-sm">
-             Encuentra a los amigos de Rojolet
-          </p>
-        </div>
-      </motion.div>
-
-      {/* Contenedor de los personajes escondidos */}
-      <div className="absolute inset-0 z-10">
-        {HIDDEN_FRIENDS.map((friend) => {
-          const isFound = found.includes(friend.id)
-          
-          return (
-            <motion.button
-              key={friend.id}
-              onClick={() => handleFriendClick(friend)}
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              className={`absolute flex items-center justify-center cursor-pointer ${
-                isFound ? 'pointer-events-none' : ''
-              }`}
-              style={{
-                left: `${friend.x}%`,
-                top: `${friend.y}%`,
-                transform: 'translate(-50%, -50%)'
-              }}
-              whileHover={!isFound ? { scale: 1.2 } : {}}
-              whileTap={!isFound ? { scale: 0.9 } : {}}
-            >
-              <span className={`text-4xl md:text-5xl drop-shadow-lg transition-all duration-500 ${
-                isFound ? 'opacity-100 scale-110' : 'opacity-75 scale-90 blur-[0.5px]'
-              }`}>
-                {friend.emoji}
-              </span>
-
-              {isFound && (
-                <motion.div
-                  initial={{ scale: 0, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  className="absolute w-14 h-14 md:w-16 md:h-16 border-4 border-green-500 rounded-full bg-green-500/10"
-                />
-              )}
-            </motion.button>
-          )
-        })}
-      </div>
-
-      {/* Contador flotante abajo */}
-      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20">
-        <div className="bg-white/90 backdrop-blur-sm rounded-full px-6 py-2 shadow-lg border border-red-200">
-          <p className="text-red-900 font-bold text-sm">
-            🐦 Amigos encontrados: {found.length} / {HIDDEN_FRIENDS.length}
-          </p>
+    <div className="min-h-screen relative">
+      <div className="fixed top-0 left-0 right-0 bg-purple-900/90 backdrop-blur-md text-white p-3 z-30 shadow-lg">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
+          <button onClick={onExit} className="px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-colors text-sm md:text-base">← Salir</button>
+          <div className="text-center">
+            <div className="text-2xl">{level.emoji}</div>
+            <div className="text-xs md:text-sm font-semibold">Nivel {level.id}</div>
+          </div>
+          <div className="flex items-center gap-1 md:gap-2">
+            {[1, 2, 3].map(star => (
+              <motion.span key={star} animate={star <= starsEarned ? { scale: [1, 1.3, 1] } : {}} className={`text-2xl md:text-3xl ${star <= starsEarned ? '' : 'grayscale opacity-30'}`}>⭐</motion.span>
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Modal de Victoria */}
-      <AnimatePresence>
-        {completed && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0, rotate: -180 }}
-              animate={{ scale: 1, rotate: 0 }}
-              transition={{ type: 'spring', bounce: 0.6 }}
-              className="bg-linear-to-br from-red-400 via-orange-500 to-yellow-500 rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full border-4 border-yellow-300"
-            >
-              <div className="text-7xl mb-3">🐦</div>
-              <h3 className="text-2xl md:text-3xl font-bold text-white mb-3 drop-shadow-lg">
-                ¡Encontraste a todos!
-              </h3>
-              <p className="text-white text-lg mb-4 drop-shadow">
-                Rojolet ya no está solo, tiene grandes amigos
-              </p>
+      <div className="pt-16 md:pt-20">
+        <AnimatePresence mode="wait">
+          {currentPhase === 1 && (
+            <motion.div key="phase1" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}>
+              {level.id === 1 && <Phase1Detective onComplete={handlePhaseComplete} />}
+              {level.id === 2 && <Phase1BodyPuzzle onComplete={handlePhaseComplete} />}
+              {level.id === 3 && <Phase1ClaritaPaths onComplete={handlePhaseComplete} />}
+              {level.id === 4 && <MemoryGame pairs={['memory1', 'memory2', 'memory3']} onComplete={handlePhaseComplete} />}
+              {level.id === 5 && <Phase1SimonDifferences onComplete={handlePhaseComplete} />}
+              {level.id === 6 && <Phase1RojoletCatch onComplete={handlePhaseComplete} />}
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+          )}
+
+          {currentPhase === 2 && (
+            <motion.div key="phase2" initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -50 }}>
+              {level.id === 1 && <Phase2Quiz level={level} onComplete={handlePhaseComplete} />}
+              {level.id === 2 && <Phase2Thomas onComplete={handlePhaseComplete} />}
+              {level.id === 3 && <Phase1PathFinder onComplete={handlePhaseComplete} />}
+              {level.id === 4 && <MemoryGame pairs={['memory4', 'memory5', 'memory6', 'memory7']} onComplete={handlePhaseComplete} />}
+              {level.id === 5 && <Phase2SimonLake onComplete={handlePhaseComplete} />}
+              {level.id === 6 && <Phase2RojoletFriends onComplete={handlePhaseComplete} />}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
     </div>
   )
 }
