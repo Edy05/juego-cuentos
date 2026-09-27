@@ -113,5 +113,46 @@ export const levels = [
     phase2CorrectAnswer: 0,
     phase3HiddenObject: '',
     phase3Hint: 'Busca el objeto escondido'
+  },
+  // Nivel 7: Especial - Devuelve a cada animalito a su hábitat
+  {
+    id: 7,
+    characterId: 7,
+    characterName: "Nivel Especial",
+    storyTitle: "Devuelve a cada animalito a su hábitat",
+    emoji: "",
+    color: "from-indigo-500 to-purple-600",
+    phase2Question: "¿Por qué es importante que cada animal viva en su hábitat natural?",
+    phase2Options: [
+      {
+        id: 1,
+        emoji: '🌍',
+        label: 'Porque ahí encuentran su comida y hogar',
+        isCorrect: true
+      },
+      {
+        id: 2,
+        emoji: '',
+        label: 'Porque se ven más bonitos ahí',
+        isCorrect: false,
+        feedback: 'No es solo por verse bonitos, ¡es por sobrevivir!'
+      },
+      {
+        id: 3,
+        emoji: '🎮',
+        label: 'Porque es un juego',
+        isCorrect: false,
+        feedback: 'La naturaleza no es un juego, ¡es la casa de los animales!'
+      }
+    ],
+    phase2CorrectAnswer: 0,
+    phase3HiddenObject: '',
+    phase3Hint: 'Busca el objeto escondido'
   }
 ]
+
+
+
+
+
+

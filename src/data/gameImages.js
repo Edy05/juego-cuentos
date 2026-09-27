@@ -72,6 +72,23 @@ export const levelImages = {
   '/rojolet-con-color.jpeg',
   '/rojolet-bosque-bg.jpeg', 
 ],
+
+ // ✅ NUEVO: Nivel 7 Especial
+  7: [
+    '/level7-habitats-bg.jpeg',
+    '/animal-mariquita.jpeg',
+    '/animal-sapo.jpeg',
+    '/animal-ardilla.jpeg',
+    '/animal-girasol.jpeg',
+    '/animal-lechuza.jpeg',
+    '/animal-cuervo.jpeg',
+    '/animal-grillo.jpeg',
+    '/animal-oruga.jpeg',
+    '/animal-caracol.jpeg',
+    '/animal-pajarito1.jpeg',
+    '/animal-pajarito2.jpeg',
+    '/libro-cuentos.jpg',
+  ],
 }
 
 

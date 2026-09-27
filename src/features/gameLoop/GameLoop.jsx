@@ -8,12 +8,14 @@ import Phase1PathFinder from './phases/Phase1PathFinder'
 import Phase1ClaritaPaths from './phases/Phase1ClaritaPaths'
 import Phase1SimonDifferences from './phases/Phase1SimonDifferences'
 import Phase1RojoletCatch from './phases/Phase1RojoletCatch'
+import Phase1Level7Habitats from './phases/Phase1Level7Habitats'
 
 // Fases 2
 import Phase2Quiz from './phases/Phase2Quiz'
 import Phase2Thomas from './phases/Phase2Thomas'
 import Phase2SimonLake from './phases/Phase2SimonLake'
 import Phase2RojoletFriends from './phases/Phase2RojoletFriends'
+import Phase2Level7Puzzle from './phases/Phase2Level7Puzzle' // ✅ NUEVO
 
 // Utilidades
 import MemoryGame from './phases/MemoryGame'
@@ -68,6 +70,7 @@ export default function GameLoop({ level, onComplete, onExit }) {
               {level.id === 4 && <MemoryGame pairs={['memory1', 'memory2', 'memory3']} onComplete={handlePhaseComplete} />}
               {level.id === 5 && <Phase1SimonDifferences onComplete={handlePhaseComplete} />}
               {level.id === 6 && <Phase1RojoletCatch onComplete={handlePhaseComplete} />}
+              {level.id === 7 && <Phase1Level7Habitats onComplete={handlePhaseComplete} />}
             </motion.div>
           )}
 
@@ -79,6 +82,8 @@ export default function GameLoop({ level, onComplete, onExit }) {
               {level.id === 4 && <MemoryGame pairs={['memory4', 'memory5', 'memory6', 'memory7']} onComplete={handlePhaseComplete} />}
               {level.id === 5 && <Phase2SimonLake onComplete={handlePhaseComplete} />}
               {level.id === 6 && <Phase2RojoletFriends onComplete={handlePhaseComplete} />}
+              {/* ✅ NUEVO: Nivel 7 Fase 2 - Rompecabezas */}
+              {level.id === 7 && <Phase2Level7Puzzle onComplete={handlePhaseComplete} />}
             </motion.div>
           )}
         </AnimatePresence>
