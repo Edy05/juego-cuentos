@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 // ✅ CORREGIDO: Se restauró el emoji de la baya roja
 const FALLING_ITEMS = [
@@ -9,6 +10,8 @@ const FALLING_ITEMS = [
 ]
 
 export default function Phase1RojoletCatch({ onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
+  
   const [items, setItems] = useState([])
   const [score, setScore] = useState(0)
   const [caughtItems, setCaughtItems] = useState(0)
@@ -17,6 +20,15 @@ export default function Phase1RojoletCatch({ onComplete }) {
   const [colorIntensity, setColorIntensity] = useState(0)
 
   const TARGET_ITEMS = 15
+
+  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level6-fase1-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
 
   const spawnItem = useCallback(() => {
     if (completed || showColorChange) return
@@ -67,13 +79,21 @@ export default function Phase1RojoletCatch({ onComplete }) {
   }, [completed])
 
   const handleItemClick = (item) => {
+    // ✅ Sonido de interacción al tocar cualquier elemento
+    playSFX('click')
+
     if (item.type === 'good') {
+      // ✅ Sonido de acierto al atrapar bayas o rocío
+      playSFX('correct')
+      
       setScore(prev => prev + item.points)
       setCaughtItems(prev => {
         const newCount = prev + 1
         setColorIntensity(Math.min((newCount / TARGET_ITEMS) * 100, 100))
         
         if (newCount >= TARGET_ITEMS && !completed) {
+          // ✅ Sonido de victoria al completar el objetivo
+          playSFX('victory')
           setShowColorChange(true)
           setTimeout(() => {
             setCompleted(true)
@@ -82,6 +102,9 @@ export default function Phase1RojoletCatch({ onComplete }) {
         }
         return newCount
       })
+    } else {
+      // ✅ Sonido de error/neutral al tocar una hoja seca (no suma puntos)
+      playSFX('wrong')
     }
 
     setItems(prev => prev.filter(i => i.uniqueId !== item.uniqueId))

@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 // Configuración de los animales y sus hogares
 const ANIMALS = [
@@ -42,14 +43,31 @@ const ANIMALS = [
 ]
 
 export default function Phase1PathFinder({ onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
+  
   const [movedAnimals, setMovedAnimals] = useState({})
   const [currentImage, setCurrentImage] = useState(null)
   const [completed, setCompleted] = useState(false)
 
+  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level3-fase2-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
+
   const handleAnimalClick = (animal) => {
     if (movedAnimals[animal.id]) return
 
+    // ✅ Sonido de interacción al tocar el animal
+    playSFX('click')
+
     setMovedAnimals(prev => ({ ...prev, [animal.id]: true }))
+    
+    // ✅ Sonido de acierto/recompensa al enviarlo a su hogar
+    playSFX('correct')
 
     setTimeout(() => {
       setCurrentImage(animal)
@@ -60,6 +78,8 @@ export default function Phase1PathFinder({ onComplete }) {
         const newMoved = { ...movedAnimals, [animal.id]: true }
         if (Object.keys(newMoved).length === ANIMALS.length) {
           setTimeout(() => {
+            // ✅ Sonido de victoria al completar el nivel
+            playSFX('victory')
             setCompleted(true)
             setTimeout(() => onComplete(1), 3000)
           }, 500)

@@ -1,7 +1,11 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+// ✅ RUTA CORREGIDA: Subimos 3 niveles (../../../) para llegar a src/context
+import { useAudio } from '../../../context/AudioContext'
 
 export default function Phase2Quiz({ level, onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
+  
   const [selectedId, setSelectedId] = useState(null)
   const [feedback, setFeedback] = useState(null)
   const [completed, setCompleted] = useState(false)
@@ -20,7 +24,7 @@ export default function Phase2Quiz({ level, onComplete }) {
       label: 'Ir al espacio',
       img: '/lina-space.jpeg',
       isCorrect: false,
-      feedback: '¡Ups! Lina es detective del jardín, no astronauta. '
+      feedback: '¡Ups! Lina es detective del jardín, no astronauta.'
     },
     {
       id: 3,
@@ -34,36 +38,59 @@ export default function Phase2Quiz({ level, onComplete }) {
       label: 'Nadar',
       img: '/lina-swim.jpeg',
       isCorrect: false,
-      feedback: '¡Ups! Lina tiene una misión en el jardín. '
+      feedback: '¡Ups! Lina tiene una misión en el jardín.'
     }
   ]
 
   // Opciones por defecto para otros niveles
   const optionsDefault = [
-    { id: 1, emoji: '', label: 'Ayudar a limpiar', isCorrect: true },
-    { id: 2, emoji: '🙅‍♀️', label: 'Tirar basura', isCorrect: false, feedback: '¡Ups! Lina nunca ensuciaría. ' },
-    { id: 3, emoji: '💃', label: 'Bailar', isCorrect: false, feedback: '¡Primero hay que limpiar! ' }
+    { id: 1, emoji: '🤝', label: 'Ayudar a limpiar', isCorrect: true },
+    { id: 2, emoji: '🙅‍♀️', label: 'Tirar basura', isCorrect: false, feedback: '¡Ups! Lina nunca ensuciaría.' },
+    { id: 3, emoji: '💃', label: 'Bailar', isCorrect: false, feedback: '¡Primero hay que limpiar!' }
   ]
 
   const options = level.id === 1 ? optionsLevel1 : optionsDefault
 
+  // Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level1-fase2-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
+
   const handleSelect = (option) => {
+    // Evitar clics múltiples si ya hay una selección activa
+    if (selectedId !== null) return
+
+    // Sonido de clic al tocar cualquier opción
+    playSFX('click')
     setSelectedId(option.id)
 
     if (option.isCorrect) {
+      // Sonido de acierto
+      playSFX('correct')
+      
       const successMessage = level.id === 1 
-        ? '¡Excelente! Lina siempre ayuda. ' 
+        ? '¡Excelente! Lina siempre ayuda.' 
         : '¡Excelente!'
         
       setFeedback({ type: 'success', message: successMessage })
       setCompleted(true)
       setTimeout(() => onComplete(1), 2500) 
     } else {
+      // Sonido de error suave
+      playSFX('wrong')
+      
       setFeedback({ type: 'error', message: option.feedback || '¡Ups! Intenta de nuevo.' })
-      setTimeout(() => setSelectedId(null), 2000)
+      
+      // Permitir intentar de nuevo después de 2 segundos
+      setTimeout(() => {
+        setSelectedId(null)
+        setFeedback(null)
+      }, 2000)
     }
-
-    setTimeout(() => setFeedback(null), 3000)
   }
 
   return (
@@ -137,7 +164,7 @@ export default function Phase2Quiz({ level, onComplete }) {
         )}
       </AnimatePresence>
 
-      {/* Tarjetas de Opciones - PEQUEÑAS */}
+      {/* Tarjetas de Opciones */}
       <div className="relative z-10 grid grid-cols-2 gap-3 w-full max-w-lg flex-grow items-center px-2">
         {options.map((option, index) => {
           const isSelected = selectedId === option.id
@@ -176,7 +203,7 @@ export default function Phase2Quiz({ level, onComplete }) {
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className={`w-full h-full bg-white/90 flex flex-col items-center justify-center p-3`}>
+                <div className="w-full h-full bg-white/90 flex flex-col items-center justify-center p-3">
                   <div className="text-4xl mb-2">{option.emoji}</div>
                   <p className="text-xs font-bold text-gray-700 text-center">
                     {option.label}
@@ -184,7 +211,7 @@ export default function Phase2Quiz({ level, onComplete }) {
                 </div>
               )}
 
-              {/* Label pequeño */}
+              {/* Label pequeño para imágenes */}
               {option.img && (
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-2">
                   <p className="text-white font-bold text-xs text-center">
@@ -193,7 +220,7 @@ export default function Phase2Quiz({ level, onComplete }) {
                 </div>
               )}
 
-              {/* Indicador */}
+              {/* Indicador de Error */}
               {isWrong && (
                 <motion.div 
                   initial={{ scale: 0 }}
@@ -204,6 +231,7 @@ export default function Phase2Quiz({ level, onComplete }) {
                 </motion.div>
               )}
 
+              {/* Indicador de Acierto */}
               {isSelected && option.isCorrect && (
                 <motion.div 
                   initial={{ scale: 0 }}

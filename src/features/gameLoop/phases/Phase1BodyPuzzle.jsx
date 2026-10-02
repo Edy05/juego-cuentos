@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 // Definición de los animales y sus partes
 const ANIMALS = ['thomas', 'ardilla', 'lechuza', 'hormiga']
@@ -17,6 +18,8 @@ const getRandomAnimal = (exclude = null) => {
 }
 
 export default function Phase1BodyPuzzle({ onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
+  
   const [parts, setParts] = useState({
     head: getRandomAnimal('thomas'),
     body: getRandomAnimal('thomas'),
@@ -24,20 +27,38 @@ export default function Phase1BodyPuzzle({ onComplete }) {
   })
   const [completed, setCompleted] = useState(false)
 
+  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level2-fase1-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
+
   const handlePartClick = (partId) => {
     if (completed) return
+
+    // ✅ Sonido de interacción al tocar
+    playSFX('click')
 
     // Ciclo entre los 4 animales
     const currentIndex = ANIMALS.indexOf(parts[partId])
     const nextIndex = (currentIndex + 1) % ANIMALS.length
     const nextAnimal = ANIMALS[nextIndex]
 
-    setParts(prev => ({ ...prev, [partId]: nextAnimal }))
-
-    // Verificar si completó
     const newParts = { ...parts, [partId]: nextAnimal }
+    setParts(newParts)
+
+    // ✅ Sonido de acierto si la parte recién seleccionada es la correcta
+    if (nextAnimal === 'thomas') {
+      playSFX('correct')
+    }
+
+    // Verificar si completó todo el animal
     if (newParts.head === 'thomas' && newParts.body === 'thomas' && newParts.legs === 'thomas') {
-      // ⏱️ TIEMPO ORIGINAL RESTAURADO
+      // ✅ Sonido de victoria al completar el nivel
+      playSFX('victory')
       setCompleted(true)
       setTimeout(() => onComplete(1), 3000)
     }
@@ -112,7 +133,7 @@ export default function Phase1BodyPuzzle({ onComplete }) {
                   }}
                 />
                 <div className="hidden w-full h-full bg-gray-200 items-center justify-center text-4xl">
-                  {currentAnimal === 'thomas' ? '🐛' : currentAnimal === 'ardilla' ? '🐿️' : currentAnimal === 'lechuza' ? '' : '🐜'}
+                  {currentAnimal === 'thomas' ? '🐛' : currentAnimal === 'ardilla' ? '🐿️' : currentAnimal === 'lechuza' ? '🦉' : '🐜'}
                 </div>
 
                 {/* Indicador de parte correcta */}

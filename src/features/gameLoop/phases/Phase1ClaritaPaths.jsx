@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 // Configuración de los 3 caminos - POSICIONES AJUSTADAS
 const PATHS = [
@@ -10,8 +11,8 @@ const PATHS = [
     isCorrect: false,
     destination: '/clarita-panal.jpeg',
     feedback: '¡Oh no! Este camino lleva al panal de abejas. ¡No es el hogar de Clarita! 🐝',
-    buttonX: 25, // Izquierda (inicio del camino rojo)
-    buttonY: 78  // Abajo, cerca de Clarita
+    buttonX: 10, // Izquierda (inicio del camino rojo)
+    buttonY: 68  // Abajo, cerca de Clarita
   },
   {
     id: 'lago',
@@ -21,7 +22,7 @@ const PATHS = [
     destination: '/clarita-lago.png',
     feedback: '¡Ups! Este camino lleva al lago. Clarita no sabe nadar. 💧',
     buttonX: 43, // Centro (inicio del camino azul)
-    buttonY: 78
+    buttonY: 68
   },
   {
     id: 'madriguera',
@@ -30,30 +31,54 @@ const PATHS = [
     isCorrect: true,
     destination: '/clarita-avatar.jpeg',
     feedback: '',
-    buttonX: 60, // Derecha (inicio del camino verde)
-    buttonY: 78
+    buttonX: 65, // Derecha (inicio del camino verde)
+    buttonY: 68
   }
 ]
 
 export default function Phase1ClaritaPaths({ onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
+  
   const [selectedPath, setSelectedPath] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [completed, setCompleted] = useState(false)
 
+  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level3-fase1-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
+
   const handlePathClick = (path) => {
+    // ✅ Sonido de interacción al tocar un camino
+    playSFX('click')
+    
     setSelectedPath(path)
     setShowModal(true)
 
     if (path.isCorrect) {
+      // ✅ Sonido de acierto al elegir el camino correcto
+      playSFX('correct')
+      
       setTimeout(() => {
+        // ✅ Sonido de victoria al completar el nivel
+        playSFX('victory')
         setCompleted(true)
         setTimeout(() => onComplete(1), 3000)
       }, 2500)
+    } else {
+      // ✅ Sonido de error al elegir un camino incorrecto
+      playSFX('wrong')
     }
   }
 
   const handleCloseModal = () => {
     if (!completed) {
+      // ✅ Sonido de interacción al cerrar el modal de error
+      playSFX('click')
       setShowModal(false)
       setSelectedPath(null)
     }

@@ -1,8 +1,11 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 // Componente reutilizable para el juego de memoria
 export default function MemoryGame({ pairs, onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
+
   // Inicialización perezosa para barajar las cartas
   const [cards] = useState(() => {
     const duplicated = [...pairs, ...pairs]
@@ -17,6 +20,15 @@ export default function MemoryGame({ pairs, onComplete }) {
   const [disabled, setDisabled] = useState(false)
   const [showChest, setShowChest] = useState(false)
 
+  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level4-fase1y2-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
+
   // Posiciones fijas precalculadas para los destellos
   const sparklePositions = useMemo(() => [
     { top: '25%', left: '15%' },
@@ -30,6 +42,9 @@ export default function MemoryGame({ pairs, onComplete }) {
   const handleCardClick = (index) => {
     if (disabled || flipped.includes(index) || matched.includes(index)) return
 
+    // ✅ Sonido de interacción al voltear una carta
+    playSFX('click')
+
     const newFlipped = [...flipped, index]
     setFlipped(newFlipped)
 
@@ -38,6 +53,9 @@ export default function MemoryGame({ pairs, onComplete }) {
       const [first, second] = newFlipped
       
       if (cards[first] === cards[second]) {
+        // ✅ Sonido de acierto al encontrar un par
+        playSFX('correct')
+        
         const newMatched = [...matched, first, second]
         setMatched(newMatched)
         setFlipped([])
@@ -46,11 +64,16 @@ export default function MemoryGame({ pairs, onComplete }) {
         // Verificar victoria
         if (newMatched.length === cards.length) {
           setTimeout(() => {
+            // ✅ Sonido de victoria al completar el juego de memoria
+            playSFX('victory')
             setShowChest(true)
             setTimeout(() => onComplete(1), 4000)
           }, 800)
         }
       } else {
+        // ✅ Sonido de error al no coincidir las cartas
+        playSFX('wrong')
+        
         setTimeout(() => {
           setFlipped([])
           setDisabled(false)
@@ -67,11 +90,12 @@ export default function MemoryGame({ pairs, onComplete }) {
 
   return (
     <div className="min-h-screen relative overflow-hidden flex flex-col">
-              {/* Fondo: en móvil desplaza la imagen para mostrar más la ardilla a la izquierda */}
+      {/* Fondo: en móvil desplaza la imagen para mostrar más la ardilla a la izquierda */}
       <div 
         className="absolute inset-0 bg-cover bg-[10%_center] md:bg-center bg-no-repeat"
         style={{ backgroundImage: "url('/level4-phases-bg.jpeg')" }}
       />
+      
       {/* Header */}
       <motion.div 
         initial={{ y: -20, opacity: 0 }}
@@ -90,7 +114,7 @@ export default function MemoryGame({ pairs, onComplete }) {
         </div>
       </motion.div>
 
-          {/* Panel de cartas - MÁS GRANDES y mejor posicionado (más abajo para no tapar el header) */}
+      {/* Panel de cartas - MÁS GRANDES y mejor posicionado (más abajo para no tapar el header) */}
       <div className="absolute right-2 md:right-8 top-[45%] md:top-1/2 -translate-y-1/2 z-10">
         <div 
           className={`grid gap-2 md:gap-3 ${

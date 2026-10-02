@@ -1,27 +1,45 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 // Diferencias a encontrar
 const DIFFERENCES = [
   { id: 1, emoji: '🦋', x: 85, y: 15, label: 'Mariposa extra' },
   { id: 2, emoji: '🌸', x: 15, y: 75, label: 'Flor brillante' },
-  { id: 3, emoji: '🍄', x: 70, y: 85, label: 'Hongo escondido' },
+  { id: 3, emoji: '🍄', x: 70, y: 60, label: 'Hongo escondido' },
   { id: 4, emoji: '✨', x: 45, y: 45, label: 'Destello mágico' }
 ]
 
 export default function Phase1SimonDifferences({ onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
+  
   const [found, setFound] = useState([])
   const [showError, setShowError] = useState(false)
   const [completed, setCompleted] = useState(false)
 
+  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level5-fase1-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
+
   const handleDifferenceClick = (diff) => {
     if (found.includes(diff.id)) return
+    
+    // ✅ Sonido de interacción y acierto al encontrar una diferencia
+    playSFX('click')
+    playSFX('correct')
     
     const newFound = [...found, diff.id]
     setFound(newFound)
 
     if (newFound.length === DIFFERENCES.length) {
       setTimeout(() => {
+        // ✅ Sonido de victoria al completar el nivel
+        playSFX('victory')
         setCompleted(true)
         setTimeout(() => onComplete(1), 3000)
       }, 1000)
@@ -29,6 +47,8 @@ export default function Phase1SimonDifferences({ onComplete }) {
   }
 
   const handleBackgroundClick = () => {
+    // ✅ Sonido de error al tocar el fondo en lugar de una diferencia
+    playSFX('wrong')
     setShowError(true)
     setTimeout(() => setShowError(false), 800)
   }

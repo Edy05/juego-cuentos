@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 const PUZZLE_SIZE = 3
 const TOTAL_PIECES = PUZZLE_SIZE * PUZZLE_SIZE
@@ -31,11 +32,22 @@ const shuffleArray = (array) => {
 }
 
 export default function Phase2Level7Puzzle({ onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
+  
   const [pieces] = useState(() => shuffleArray(INITIAL_PIECES))
   const [placedPieces, setPlacedPieces] = useState({})
   const [completed, setCompleted] = useState(false)
   const [showFullImage, setShowFullImage] = useState(false)
   const [draggedPiece, setDraggedPiece] = useState(null)
+
+  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level7-fase2-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
 
   const handleDragEnd = useCallback((piece, info) => {
     if (placedPieces[piece.id]) return
@@ -58,6 +70,9 @@ export default function Phase2Level7Puzzle({ onComplete }) {
       const row = Math.floor(((dropY - gridStartY) / gridHeight) * PUZZLE_SIZE)
 
       if (row === piece.correctRow && col === piece.correctCol) {
+        // ✅ Sonido de acierto al colocar la pieza correctamente
+        playSFX('correct')
+        
         const newPlaced = { 
           ...placedPieces, 
           [piece.id]: { row, col, backgroundPosition: piece.backgroundPosition } 
@@ -66,6 +81,8 @@ export default function Phase2Level7Puzzle({ onComplete }) {
 
         if (Object.keys(newPlaced).length === TOTAL_PIECES) {
           setTimeout(() => {
+            // ✅ Sonido de victoria al completar el rompecabezas
+            playSFX('victory')
             setShowFullImage(true)
             setTimeout(() => {
               setCompleted(true)
@@ -73,9 +90,15 @@ export default function Phase2Level7Puzzle({ onComplete }) {
             }, 3500)
           }, 800)
         }
+      } else {
+        // ✅ Sonido de error si cae en la cuadrícula pero en el lugar equivocado
+        playSFX('wrong')
       }
+    } else {
+      // ✅ Sonido de error si cae fuera de la cuadrícula
+      playSFX('wrong')
     }
-  }, [placedPieces, onComplete])
+  }, [placedPieces, onComplete, playSFX])
 
   return (
     <div className="h-screen relative overflow-hidden flex flex-col">
@@ -167,7 +190,10 @@ export default function Phase2Level7Puzzle({ onComplete }) {
                   key={piece.id}
                   drag={!isPlaced}
                   dragMomentum={false}
-                  onDragStart={() => setDraggedPiece(piece.id)}
+                  onDragStart={() => {
+                    setDraggedPiece(piece.id)
+                    playSFX('click') // ✅ Sonido al comenzar a arrastrar
+                  }}
                   onDragEnd={(event, info) => handleDragEnd(piece, info)}
                   initial={{ scale: 0 }}
                   animate={{ 
@@ -190,7 +216,6 @@ export default function Phase2Level7Puzzle({ onComplete }) {
           </div>
         </div>
       </div>
-
 
       {/* IMAGEN COMPLETA ANTES DEL MODAL DE VICTORIA */}
       <AnimatePresence>
@@ -247,7 +272,7 @@ export default function Phase2Level7Puzzle({ onComplete }) {
                 animate={{ rotate: [0, 10, -10, 0] }}
                 transition={{ duration: 1, repeat: Infinity }}
               >
-                
+                🏆
               </motion.div>
               <h3 className="text-3xl md:text-4xl font-bold text-white mb-3 drop-shadow-lg">
                 ¡Felicidades!

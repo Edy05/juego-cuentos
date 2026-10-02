@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import WelcomeScreen from './features/onboarding/WelcomeScreen'
 import AvatarSelection from './features/onboarding/AvatarSelection'
@@ -8,18 +8,42 @@ import GameLoop from './features/gameLoop/GameLoop'
 import { useGameProgress } from './hooks/useGameProgress'
 import localforage from 'localforage'
 
-// ✅ IMPORTS PARA EL SISTEMA DE AUDIO
-import { AudioProvider } from './context/AudioContext'
+import { AudioProvider, useAudio } from './context/AudioContext'
 import MuteButton from './components/MuteButton'
-
-// ✅ NUEVO IMPORT: Cargador Global de la App
 import GlobalAppLoader from './components/GlobalAppLoader'
 
-function App() {
+// ✅ 1. COMPONENTE INTERNO: Aquí SÍ podemos usar useAudio porque estará DENTRO del proveedor
+function AppContent() {
   const [step, setStep] = useState('welcome')
   const [userData, setUserData] = useState({ alias: '', character: null })
   const [selectedLevel, setSelectedLevel] = useState(null)
   const { progress, isLoading, completeLevel } = useGameProgress()
+
+  // ✅ Ahora useAudio() funciona perfectamente
+  const { playBGM } = useAudio()
+  const hasPlayed = useRef(false)
+
+  // ✅ Efecto mágico: detecta el PRIMER clic o toque en toda la página
+  useEffect(() => {
+    const handleFirstInteraction = () => {
+      if (!hasPlayed.current) {
+        playBGM() // ¡Enciende la música!
+        hasPlayed.current = true // Marca como reproducido para no repetirlo
+        
+        // Eliminamos los escuchas para no afectar el rendimiento
+        document.removeEventListener('click', handleFirstInteraction)
+        document.removeEventListener('touchstart', handleFirstInteraction)
+      }
+    }
+
+    document.addEventListener('click', handleFirstInteraction)
+    document.addEventListener('touchstart', handleFirstInteraction)
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction)
+      document.removeEventListener('touchstart', handleFirstInteraction)
+    }
+  }, [playBGM])
 
   useEffect(() => {
     const checkExistingUser = async () => {
@@ -82,46 +106,45 @@ function App() {
   }
 
   return (
-    // ✅ 1. PROVEEDOR DE AUDIO (primero, para que todo tenga acceso al sonido)
+    <GlobalAppLoader>
+      <div className="font-sans antialiased text-gray-900 relative min-h-screen">
+        <MuteButton />
+
+        {step === 'welcome' && <WelcomeScreen onComplete={handleAliasComplete} />}
+        
+        {step === 'avatar' && (
+          <AvatarSelection alias={userData.alias} onSelect={handleAvatarSelect} />
+        )}
+
+        {step === 'confirmation' && (
+          <ConfirmationScreen userData={userData} onStartGame={handleStartGame} />
+        )}
+
+        {step === 'levelSelector' && (
+          <LevelSelector 
+            progress={progress}
+            onSelectLevel={handleSelectLevel}
+            onExit={handleExitToWelcome}
+          />
+        )}
+
+        {step === 'game' && selectedLevel && (
+          <GameLoop 
+            level={selectedLevel}
+            onComplete={handleLevelComplete}
+            onExit={handleExitLevel}
+          />
+        )}
+      </div>
+    </GlobalAppLoader>
+  )
+}
+
+// ✅ 2. COMPONENTE PRINCIPAL: Solo se encarga de proveer el contexto a todo lo de abajo
+function App() {
+  return (
     <AudioProvider>
-      
-      {/* ✅ 2. CARGADOR GLOBAL (precarga imágenes antes de mostrar la app) */}
-      <GlobalAppLoader>
-        
-        <div className="font-sans antialiased text-gray-900 relative min-h-screen">
-          
-          {/* ✅ 3. BOTÓN DE MUTE (aparece solo cuando la app ya cargó) */}
-          <MuteButton />
-
-          {/* Renderizado condicional de las pantallas */}
-          {step === 'welcome' && <WelcomeScreen onComplete={handleAliasComplete} />}
-          
-          {step === 'avatar' && (
-            <AvatarSelection alias={userData.alias} onSelect={handleAvatarSelect} />
-          )}
-
-          {step === 'confirmation' && (
-            <ConfirmationScreen userData={userData} onStartGame={handleStartGame} />
-          )}
-
-          {step === 'levelSelector' && (
-            <LevelSelector 
-              progress={progress}
-              onSelectLevel={handleSelectLevel}
-              onExit={handleExitToWelcome}
-            />
-          )}
-
-          {step === 'game' && selectedLevel && (
-            <GameLoop 
-              level={selectedLevel}
-              onComplete={handleLevelComplete}
-              onExit={handleExitLevel}
-            />
-          )}
-        </div>
-        
-      </GlobalAppLoader>
+      <AppContent />
     </AudioProvider>
   )
 }

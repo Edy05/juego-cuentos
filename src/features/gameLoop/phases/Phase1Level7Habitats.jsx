@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 // HÁBITATS (zonas donde el niño debe soltar los animales)
 const HABITATS = [
@@ -24,10 +25,21 @@ const ANIMALS = [
 ]
 
 export default function Phase1Level7Habitats({ onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
+  
   const [placedIds, setPlacedIds] = useState([])
   const [resetKey, setResetKey] = useState(0)
   const [completed, setCompleted] = useState(false)
   const [successMessage, setSuccessMessage] = useState(null)
+
+  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level7-fase1-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
 
   const handleDragEnd = useCallback((animal, _event, info) => {
     if (placedIds.includes(animal.id)) return
@@ -41,6 +53,9 @@ export default function Phase1Level7Habitats({ onComplete }) {
 
     // Si está a menos del 20% de distancia, ¡es un acierto!
     if (distance < 20) {
+      // ✅ Sonido de acierto al colocar el animal correctamente
+      playSFX('correct')
+
       // Marcar como colocado
       const newPlaced = [...placedIds, animal.id]
       setPlacedIds(newPlaced)
@@ -52,15 +67,20 @@ export default function Phase1Level7Habitats({ onComplete }) {
       // Verificar si todos están colocados
       if (newPlaced.length === ANIMALS.length) {
         setTimeout(() => {
+          // ✅ Sonido de victoria al completar el nivel
+          playSFX('victory')
           setCompleted(true)
           setTimeout(() => onComplete(1), 3000)
         }, 1500)
       }
     } else {
+      // ✅ Sonido de error al soltar el animal en un lugar incorrecto
+      playSFX('wrong')
+      
       // Si falló, regresa a su lugar
       setResetKey((prev) => prev + 1)
     }
-  }, [placedIds, onComplete])
+  }, [placedIds, onComplete, playSFX])
 
   return (
     <div className="h-screen relative overflow-hidden flex flex-col bg-sky-50">
@@ -119,6 +139,7 @@ export default function Phase1Level7Habitats({ onComplete }) {
               key={`${resetKey}-${animal.id}`}
               drag={!isPlaced}
               dragMomentum={false}
+              onDragStart={() => !isPlaced && playSFX('click')} // ✅ Sonido al comenzar a arrastrar
               onDragEnd={(_event, info) => handleDragEnd(animal, _event, info)}
               initial={false}
               animate={{

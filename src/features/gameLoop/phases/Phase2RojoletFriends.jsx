@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 // ✅ AMIGOS ESCONDIDOS (Emojis verificados y coordenadas seguras)
 const HIDDEN_FRIENDS = [
@@ -10,17 +11,34 @@ const HIDDEN_FRIENDS = [
 ]
 
 export default function Phase2RojoletFriends({ onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
+  
   const [found, setFound] = useState([])
   const [completed, setCompleted] = useState(false)
 
+  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level6-fase2-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
+
   const handleFriendClick = (friend) => {
     if (found.includes(friend.id)) return
+    
+    // ✅ Sonido de interacción y acierto al encontrar un amigo
+    playSFX('click')
+    playSFX('correct')
     
     const newFound = [...found, friend.id]
     setFound(newFound)
 
     if (newFound.length === HIDDEN_FRIENDS.length) {
       setTimeout(() => {
+        // ✅ Sonido de victoria al completar el nivel
+        playSFX('victory')
         setCompleted(true)
         setTimeout(() => onComplete(1), 3000)
       }, 1000)

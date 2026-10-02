@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si tu carpeta es diferente
 
 // 10 hojas sucias distribuidas por el jardín
 const LEAVES = [
@@ -16,19 +17,34 @@ const LEAVES = [
 ]
 
 export default function Phase1Detective({ onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
   const [cleanedLeaves, setCleanedLeaves] = useState([])
   const [feedback, setFeedback] = useState(null)
   const [completed, setCompleted] = useState(false)
 
+  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level1-fase1-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
+
   const handleLeafClick = (leafId) => {
     if (cleanedLeaves.includes(leafId)) return
 
-    setCleanedLeaves([...cleanedLeaves, leafId])
+    // ✅ Sonido de acierto al limpiar la hoja
+    playSFX('correct')
+
+    setCleanedLeaves((prev) => [...prev, leafId])
     setFeedback({ type: 'success', message: '¡Hoja limpia! ' })
 
     const newTotal = cleanedLeaves.length + 1
     
     if (newTotal === 10) {
+      // ✅ Sonido de victoria al completar el nivel
+      playSFX('victory')
       setCompleted(true)
       setTimeout(() => onComplete(1), 2500)
     }
@@ -81,7 +97,7 @@ export default function Phase1Detective({ onComplete }) {
         )}
       </AnimatePresence>
 
-      {/* Hojas secias interactivas */}
+      {/* Hojas secas interactivas */}
       {LEAVES.map((leaf, index) => {
         const isCleaned = cleanedLeaves.includes(leaf.id)
         
@@ -124,7 +140,7 @@ export default function Phase1Detective({ onComplete }) {
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: 'spring', bounce: 0.6 }}
-              className="bg-gradient-to-br from-amber-400 to-orange-500 rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full"
+              className="bg-linear-to-br from-amber-400 to-orange-500 rounded-3xl p-8 text-center shadow-2xl max-w-sm w-full"
             >
               <div className="text-7xl mb-3">🔍✨</div>
               <h3 className="text-2xl md:text-3xl font-bold text-white mb-3">
@@ -139,7 +155,7 @@ export default function Phase1Detective({ onComplete }) {
         )}
       </AnimatePresence>
 
-      {/* Instrucciones */}
+      {/* Instrucciones visuales */}
       <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30">
         <div className="bg-white/95 backdrop-blur-sm rounded-full px-6 py-3 shadow-xl">
           <p className="text-amber-800 font-bold text-sm md:text-base">

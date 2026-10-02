@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 // Opciones de alas
 const WINGS_OPTIONS = [
@@ -38,24 +39,48 @@ const WINGS_OPTIONS = [
 ]
 
 export default function Phase2Thomas({ onComplete }) {
+  const { playSFX, playInstruction } = useAudio()
+  
   const [selectedWings, setSelectedWings] = useState(null)
   const [showTransformation, setShowTransformation] = useState(false)
   const [completed, setCompleted] = useState(false)
 
+  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      playInstruction('level2-fase2-audio.mp3')
+    }, 3000)
+    
+    return () => clearTimeout(timer)
+  }, [playInstruction])
+
   const handleWingsSelect = (option) => {
+    // ✅ Sonido de interacción al tocar una opción
+    playSFX('click')
+    
     setSelectedWings(option)
     setShowTransformation(true)
 
     if (option.isCorrect) {
+      // ✅ Sonido de acierto al elegir la correcta
+      playSFX('correct')
+      
       setTimeout(() => {
+        // ✅ Sonido de victoria al completar el nivel
+        playSFX('victory')
         setCompleted(true)
         setTimeout(() => onComplete(1), 3000)
       }, 2500)
-    } 
+    } else {
+      // ✅ Sonido de error al elegir una incorrecta
+      playSFX('wrong')
+    }
   }
 
   const handleCloseTransformation = () => {
     if (!completed) {
+      // ✅ Sonido de interacción al cerrar el modal de error
+      playSFX('click')
       setShowTransformation(false)
       setSelectedWings(null)
     }
@@ -73,7 +98,7 @@ export default function Phase2Thomas({ onComplete }) {
       {/* Capa oscura suave */}
       <div className="absolute inset-0 bg-black/30" />
 
-      {/*  MARCA SUPERIOR: Detectives del Jardín */}
+      {/* MARCA SUPERIOR: Detectives del Jardín */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
