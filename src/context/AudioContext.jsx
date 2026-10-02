@@ -7,6 +7,7 @@ export function AudioProvider({ children }) {
   const [isMuted, setIsMuted] = useState(false)
   const bgmRef = useRef(null)
   const sfxRefs = useRef({})
+  const instructionRef = useRef(null) // ✅ NUEVO: Referencia para la voz instructiva
 
   useEffect(() => {
     // Música de fondo
@@ -14,7 +15,7 @@ export function AudioProvider({ children }) {
     bgmRef.current.loop = true
     bgmRef.current.volume = 0.4 
 
-    // Efectos de sonido con sus extensiones reales
+    // Efectos de sonido
     const sfxFiles = {
       click: '/audio/sfx/click.wav',
       correct: '/audio/sfx/correct.wav',
@@ -35,7 +36,6 @@ export function AudioProvider({ children }) {
 
   const playSFX = (name) => {
     if (isMuted) return 
-    
     const sound = sfxRefs.current[name]
     if (sound) {
       sound.currentTime = 0 
@@ -43,13 +43,27 @@ export function AudioProvider({ children }) {
     }
   }
 
-  // Nueva función para las instrucciones de voz
+  // ✅ MEJORADO: Reproducir instrucción, deteniendo la anterior si existe
   const playInstruction = (filename) => {
     if (isMuted) return
     
-    const instructionAudio = new Audio(`/audio/${filename}`)
-    instructionAudio.volume = 0.8 // Un poco más alto para que se escuche bien la voz
-    instructionAudio.play().catch((err) => console.log('Instruction play blocked:', err))
+    // Detener cualquier instrucción que esté sonando actualmente
+    if (instructionRef.current) {
+      instructionRef.current.pause()
+      instructionRef.current.currentTime = 0
+    }
+
+    instructionRef.current = new Audio(`/audio/${filename}`)
+    instructionRef.current.volume = 0.8
+    instructionRef.current.play().catch((err) => console.log('Instruction play blocked:', err))
+  }
+
+  // ✅ NUEVO: Función para detener la voz instructiva manualmente
+  const stopInstruction = () => {
+    if (instructionRef.current) {
+      instructionRef.current.pause()
+      instructionRef.current.currentTime = 0
+    }
   }
 
   const playBGM = () => {
@@ -75,7 +89,15 @@ export function AudioProvider({ children }) {
   }
 
   return (
-    <AudioContext.Provider value={{ isMuted, toggleMute, playBGM, pauseBGM, playSFX, playInstruction }}>
+    <AudioContext.Provider value={{ 
+      isMuted, 
+      toggleMute, 
+      playBGM, 
+      pauseBGM, 
+      playSFX, 
+      playInstruction,
+      stopInstruction // ✅ Exportamos la nueva función
+    }}>
       {children}
     </AudioContext.Provider>
   )

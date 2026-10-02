@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si tu carpeta es diferente
 
@@ -17,24 +17,35 @@ const LEAVES = [
 ]
 
 export default function Phase1Detective({ onComplete }) {
-  const { playSFX, playInstruction } = useAudio()
+  const { playSFX, playInstruction, stopInstruction } = useAudio()
   const [cleanedLeaves, setCleanedLeaves] = useState([])
   const [feedback, setFeedback] = useState(null)
   const [completed, setCompleted] = useState(false)
 
-  // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+  // ✅ Referencia para evitar que el setTimeout se dispare múltiples veces
+  const hasPlayedRef = useRef(false)
+
   useEffect(() => {
+    if (hasPlayedRef.current) return // Si ya sonó, no lo vuelve a programar
+
     const timer = setTimeout(() => {
-      playInstruction('level1-fase1-audio.mp3')
+      hasPlayedRef.current = true
+      // ✅ AQUÍ ESTABA EL ERROR: Ahora tiene el nombre real del archivo
+      playInstruction('level1-fase1-audio.mp3') 
     }, 3000)
     
-    return () => clearTimeout(timer)
-  }, [playInstruction])
+    // ✅ FUNCIÓN DE LIMPIEZA: Se ejecuta AUTOMÁTICAMENTE al salir del nivel o desmontar el componente
+    return () => {
+      clearTimeout(timer)
+      stopInstruction() 
+    }
+  }, [playInstruction, stopInstruction])
 
   const handleLeafClick = (leafId) => {
     if (cleanedLeaves.includes(leafId)) return
 
-    // ✅ Sonido de acierto al limpiar la hoja
+    // ✅ Detener la voz instructiva inmediatamente al interactuar correctamente
+    stopInstruction()  
     playSFX('correct')
 
     setCleanedLeaves((prev) => [...prev, leafId])
@@ -43,7 +54,6 @@ export default function Phase1Detective({ onComplete }) {
     const newTotal = cleanedLeaves.length + 1
     
     if (newTotal === 10) {
-      // ✅ Sonido de victoria al completar el nivel
       playSFX('victory')
       setCompleted(true)
       setTimeout(() => onComplete(1), 2500)

@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 export default function Phase2SimonLake({ onComplete }) {
-  const { playSFX, playInstruction } = useAudio()
+  const { playSFX, playInstruction, stopInstruction } = useAudio()
   
   const [selected, setSelected] = useState(null)
   const [showModal, setShowModal] = useState(false)
@@ -11,13 +11,21 @@ export default function Phase2SimonLake({ onComplete }) {
   const [completed, setCompleted] = useState(false)
 
   // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+   const hasPlayedRef = useRef(false) // <-- Agrega esta línea antes del useEffect
+
   useEffect(() => {
+    if (hasPlayedRef.current) return // ✅ Evita que se repita si el componente se re-renderiza
+
     const timer = setTimeout(() => {
-      playInstruction('level5-fase2-audio.mp3')
+      hasPlayedRef.current = true
+      playInstruction('level5-fase2-audio.mp3') // Cambia el nombre del archivo según el nivel
     }, 3000)
     
-    return () => clearTimeout(timer)
-  }, [playInstruction])
+    return () => {
+      clearTimeout(timer)
+      stopInstruction() // ✅ Detiene la voz si el niño cambia de nivel o completa la fase
+    }
+  }, [playInstruction, stopInstruction])
 
   const handleChoice = (choice) => {
     // ✅ Sonido de interacción al tocar una opción
@@ -28,6 +36,7 @@ export default function Phase2SimonLake({ onComplete }) {
 
     if (choice === 'leaf') {
       // ✅ Sonido de acierto al elegir la respuesta correcta
+      stopInstruction()
       playSFX('correct')
       
       // Respuesta correcta: mostrar modal con caracol cruzando

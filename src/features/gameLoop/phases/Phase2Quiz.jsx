@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 // ✅ RUTA CORREGIDA: Subimos 3 niveles (../../../) para llegar a src/context
 import { useAudio } from '../../../context/AudioContext'
 
 export default function Phase2Quiz({ level, onComplete }) {
-  const { playSFX, playInstruction } = useAudio()
+  const { playSFX, playInstruction, stopInstruction } = useAudio()
   
   const [selectedId, setSelectedId] = useState(null)
   const [feedback, setFeedback] = useState(null)
@@ -52,13 +52,21 @@ export default function Phase2Quiz({ level, onComplete }) {
   const options = level.id === 1 ? optionsLevel1 : optionsDefault
 
   // Reproducir instrucción de voz a los 3 segundos de abrir la fase
+   const hasPlayedRef = useRef(false) // <-- Agrega esta línea antes del useEffect
+
   useEffect(() => {
+    if (hasPlayedRef.current) return // ✅ Evita que se repita si el componente se re-renderiza
+
     const timer = setTimeout(() => {
-      playInstruction('level1-fase2-audio.mp3')
+      hasPlayedRef.current = true
+      playInstruction('level1-fase2-audio.mp3') // Cambia el nombre del archivo según el nivel
     }, 3000)
     
-    return () => clearTimeout(timer)
-  }, [playInstruction])
+    return () => {
+      clearTimeout(timer)
+      stopInstruction() // ✅ Detiene la voz si el niño cambia de nivel o completa la fase
+    }
+  }, [playInstruction, stopInstruction])
 
   const handleSelect = (option) => {
     // Evitar clics múltiples si ya hay una selección activa
@@ -70,6 +78,7 @@ export default function Phase2Quiz({ level, onComplete }) {
 
     if (option.isCorrect) {
       // Sonido de acierto
+      stopInstruction()
       playSFX('correct')
       
       const successMessage = level.id === 1 

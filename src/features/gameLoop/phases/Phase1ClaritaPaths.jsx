@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
@@ -37,20 +37,28 @@ const PATHS = [
 ]
 
 export default function Phase1ClaritaPaths({ onComplete }) {
-  const { playSFX, playInstruction } = useAudio()
+  const { playSFX, playInstruction, stopInstruction } = useAudio()
   
   const [selectedPath, setSelectedPath] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const [completed, setCompleted] = useState(false)
 
   // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+   const hasPlayedRef = useRef(false) // <-- Agrega esta línea antes del useEffect
+
   useEffect(() => {
+    if (hasPlayedRef.current) return // ✅ Evita que se repita si el componente se re-renderiza
+
     const timer = setTimeout(() => {
-      playInstruction('level3-fase1-audio.mp3')
+      hasPlayedRef.current = true
+      playInstruction('level3-fase1-audio.mp3') // Cambia el nombre del archivo según el nivel
     }, 3000)
     
-    return () => clearTimeout(timer)
-  }, [playInstruction])
+    return () => {
+      clearTimeout(timer)
+      stopInstruction() // ✅ Detiene la voz si el niño cambia de nivel o completa la fase
+    }
+  }, [playInstruction, stopInstruction])
 
   const handlePathClick = (path) => {
     // ✅ Sonido de interacción al tocar un camino
@@ -61,6 +69,7 @@ export default function Phase1ClaritaPaths({ onComplete }) {
 
     if (path.isCorrect) {
       // ✅ Sonido de acierto al elegir el camino correcto
+      stopInstruction()
       playSFX('correct')
       
       setTimeout(() => {

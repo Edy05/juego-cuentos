@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
@@ -25,7 +25,7 @@ const ANIMALS = [
 ]
 
 export default function Phase1Level7Habitats({ onComplete }) {
-  const { playSFX, playInstruction } = useAudio()
+  const { playSFX, playInstruction, stopInstruction } = useAudio()
   
   const [placedIds, setPlacedIds] = useState([])
   const [resetKey, setResetKey] = useState(0)
@@ -33,13 +33,21 @@ export default function Phase1Level7Habitats({ onComplete }) {
   const [successMessage, setSuccessMessage] = useState(null)
 
   // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+   const hasPlayedRef = useRef(false) // <-- Agrega esta línea antes del useEffect
+
   useEffect(() => {
+    if (hasPlayedRef.current) return // ✅ Evita que se repita si el componente se re-renderiza
+
     const timer = setTimeout(() => {
-      playInstruction('level7-fase1-audio.mp3')
+      hasPlayedRef.current = true
+      playInstruction('level7-fase1-audio.mp3') // Cambia el nombre del archivo según el nivel
     }, 3000)
     
-    return () => clearTimeout(timer)
-  }, [playInstruction])
+    return () => {
+      clearTimeout(timer)
+      stopInstruction() // ✅ Detiene la voz si el niño cambia de nivel o completa la fase
+    }
+  }, [playInstruction, stopInstruction])
 
   const handleDragEnd = useCallback((animal, _event, info) => {
     if (placedIds.includes(animal.id)) return

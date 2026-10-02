@@ -1,10 +1,10 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAudio } from '../../../context/AudioContext' // Ajusta la ruta si es necesario
 
 // Componente reutilizable para el juego de memoria
 export default function MemoryGame({ pairs, onComplete }) {
-  const { playSFX, playInstruction } = useAudio()
+  const { playSFX, playInstruction, stopInstruction } = useAudio()
 
   // Inicialización perezosa para barajar las cartas
   const [cards] = useState(() => {
@@ -21,13 +21,21 @@ export default function MemoryGame({ pairs, onComplete }) {
   const [showChest, setShowChest] = useState(false)
 
   // ✅ Reproducir instrucción de voz a los 3 segundos de abrir la fase
+   const hasPlayedRef = useRef(false) // <-- Agrega esta línea antes del useEffect
+
   useEffect(() => {
+    if (hasPlayedRef.current) return // ✅ Evita que se repita si el componente se re-renderiza
+
     const timer = setTimeout(() => {
-      playInstruction('level4-fase1y2-audio.mp3')
+      hasPlayedRef.current = true
+      playInstruction('level4-fase1y2-audio.mp3') // Cambia el nombre del archivo según el nivel
     }, 3000)
     
-    return () => clearTimeout(timer)
-  }, [playInstruction])
+    return () => {
+      clearTimeout(timer)
+      stopInstruction() // ✅ Detiene la voz si el niño cambia de nivel o completa la fase
+    }
+  }, [playInstruction, stopInstruction])
 
   // Posiciones fijas precalculadas para los destellos
   const sparklePositions = useMemo(() => [
